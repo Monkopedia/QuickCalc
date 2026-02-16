@@ -44,16 +44,16 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [x] Define parity acceptance criteria for migration steps.
 
 ## Phase 3: Non-UI Test Buildout (As Complete as Possible) (P0)
-- [ ] Import any existing upstream non-UI tests.
-- [ ] Add/expand JVM unit tests for parser, tokenizer, evaluator, and state transitions.
-- [ ] Add regression test suite for known bug classes and edge cases.
-- [ ] Add property-based tests for arithmetic invariants and expression round-trip checks.
-- [ ] Add fuzz tests for parser robustness and malformed input handling.
-- [ ] Add deterministic golden tests for expression-to-result mappings.
-- [ ] Add mutation testing for critical math logic (or equivalent fault-injection checks).
-- [ ] Set strict coverage gates for non-UI code (line + branch targets).
-- [ ] Ensure tests run via one command:
-- [ ] `./gradlew :app:testDebugUnitTest`
+- [x] Import any existing upstream non-UI tests. [No upstream non-UI tests exist; documented in `docs/non-ui-test-import-audit.md`.]
+- [x] Add/expand JVM unit tests for parser, tokenizer, evaluator, and state transitions.
+- [x] Add regression test suite for known bug classes and edge cases.
+- [x] Add property-based tests for arithmetic invariants and expression round-trip checks.
+- [x] Add fuzz tests for parser robustness and malformed input handling.
+- [x] Add deterministic golden tests for expression-to-result mappings.
+- [x] Add mutation testing for critical math logic (or equivalent fault-injection checks).
+- [x] Set strict coverage gates for non-UI code (line + branch targets).
+- [x] Ensure tests run via one command:
+- [x] `./gradlew :app:testDebugUnitTest`
 
 ## Phase 4: Kotlin Migration (100% Production + Test Code) (P0)
 - [ ] Freeze behavior via tests before conversion of each package.
