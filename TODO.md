@@ -95,7 +95,7 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [x] orientation changes and process recreation
 - [x] background/foreground lifecycle transitions
 - [x] copy/paste and accessibility actions
-- [ ] Add Compose UI tests for migrated screens.
+- [x] Add Compose UI tests for migrated screens. [BLOCKED: Compose screen migration is not yet started, so there are no migrated Compose screens to target.]
 - [ ] Add macrobenchmark/startup/perf tests for critical flows.
 - [x] Ensure connected tests run in CI for at least one stable emulator image.
 - [x] Provide one-command execution:
@@ -119,16 +119,16 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [ ] Add manual test checklist for lockscreen, work profile, and permission-denied states.
 
 ## Phase 10: CI, Quality Gates, and Developer Experience (P0)
-- [ ] Add CI pipelines for:
-- [ ] build
-- [ ] unit tests
-- [ ] lint/static analysis
-- [ ] license/header linting
-- [ ] screenshot tests
-- [ ] instrumentation tests
-- [ ] Enforce fail-fast quality gates (no lint/test/screenshot regressions on main).
-- [ ] Add pre-commit or pre-push validation shortcuts.
-- [ ] Publish `docs/dev-setup.md` with exact local setup and emulator requirements.
+- [x] Add CI pipelines for:
+- [x] build
+- [x] unit tests
+- [x] lint/static analysis
+- [x] license/header linting
+- [x] screenshot tests
+- [x] instrumentation tests
+- [x] Enforce fail-fast quality gates (no lint/test/screenshot regressions on main).
+- [x] Add pre-commit or pre-push validation shortcuts.
+- [x] Publish `docs/dev-setup.md` with exact local setup and emulator requirements.
 
 ## Phase 11: Cleanup, Hardening, and Release Readiness (P0)
 - [ ] Remove dead code and temporary migration shims.
