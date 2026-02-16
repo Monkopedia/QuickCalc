@@ -69,15 +69,15 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [x] Verify full test suite parity after each conversion step. [Verified for expression engine batch using `:app:assembleDebug` and `:app:testDebugUnitTest`.]
 
 ## Phase 5: Screenshot Baseline for Existing (Pre-Compose) UI (P0)
-- [ ] Add screenshot test infrastructure for current XML/View UI.
-- [ ] Capture baseline screenshots across representative devices/orientations:
-- [ ] phone portrait
-- [ ] phone landscape
-- [ ] tablet/windowed sizes
-- [ ] dark/light themes
-- [ ] large font/scaling accessibility settings
-- [ ] Add deterministic rendering setup (fonts, locale, animations disabled, fixed clock if needed).
-- [ ] Gate UI regressions with image diff thresholds and review workflow.
+- [x] Add screenshot test infrastructure for current XML/View UI.
+- [x] Capture baseline screenshots across representative devices/orientations:
+- [x] phone portrait
+- [x] phone landscape
+- [x] tablet/windowed sizes
+- [x] dark/light themes
+- [x] large font/scaling accessibility settings
+- [x] Add deterministic rendering setup (fonts, locale, animations disabled, fixed clock if needed).
+- [x] Gate UI regressions with image diff thresholds and review workflow.
 
 ## Phase 6: Jetpack Compose UI Port with Parity Gates (P0)
 - [ ] Define UI architecture for Compose (state holders, events, navigation boundaries).

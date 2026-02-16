@@ -146,35 +146,13 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of androidx.viewpager:viewpager than 1.0.0 is available: 1.1.0"
-        errorLine1="viewpager = &quot;1.0.0&quot;"
-        errorLine2="            ~~~~~~~">
-        <location
-            file="$HOME/QuickCalc/gradle/libs.versions.toml"
-            line="4"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="GradleDependency"
         message="A newer version of androidx.compose:compose-bom than 2025.10.00 is available: 2026.02.00"
         errorLine1="composeBom = &quot;2025.10.00&quot;"
         errorLine2="             ~~~~~~~~~~~~">
         <location
             file="$HOME/QuickCalc/gradle/libs.versions.toml"
-            line="12"
+            line="13"
             column="14"/>
-    </issue>
-
-    <issue
-        id="NewerVersionAvailable"
-        message="A newer version of org.robolectric:robolectric than 4.13 is available: 4.16.1"
-        errorLine1="robolectric = &quot;4.13&quot;"
-        errorLine2="              ~~~~~~">
-        <location
-            file="$HOME/QuickCalc/gradle/libs.versions.toml"
-            line="9"
-            column="15"/>
     </issue>
 
     <issue
@@ -185,6 +163,28 @@
         <location
             file="$HOME/QuickCalc/gradle/libs.versions.toml"
             line="10"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of io.github.takahirom.roborazzi:roborazzi than 1.52.0 is available: 1.59.0"
+        errorLine1="roborazzi = &quot;1.52.0&quot;"
+        errorLine2="            ~~~~~~~~">
+        <location
+            file="$HOME/QuickCalc/gradle/libs.versions.toml"
+            line="12"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of io.github.takahirom.roborazzi:roborazzi-junit-rule than 1.52.0 is available: 1.59.0"
+        errorLine1="roborazzi = &quot;1.52.0&quot;"
+        errorLine2="            ~~~~~~~~">
+        <location
+            file="$HOME/QuickCalc/gradle/libs.versions.toml"
+            line="12"
             column="13"/>
     </issue>
 

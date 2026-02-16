@@ -1,0 +1,27 @@
+name: Screenshot Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  screenshot-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify screenshot baselines
+        run: ./gradlew :app:testDebugUnitTest -Proborazzi.test.verify=true --no-daemon
+
+      - name: Upload screenshot outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-results
+          path: |
+            app/build/reports/tests/testDebugUnitTest
+            app/build/test-results/testDebugUnitTest
+            app/src/test/screenshots

@@ -79,6 +79,8 @@ dependencies {
     testImplementation(libs.junit4)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.junit.rule)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -144,6 +146,16 @@ jacoco {
 }
 
 tasks.withType<Test>().configureEach {
+    listOf(
+        "roborazzi.test.record",
+        "roborazzi.test.compare",
+        "roborazzi.test.verify",
+        "roborazzi.record.filePathStrategy"
+    ).forEach { key ->
+        providers.gradleProperty(key).orNull?.let { value ->
+            systemProperty(key, value)
+        }
+    }
     extensions.configure<JacocoTaskExtension> {
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")
