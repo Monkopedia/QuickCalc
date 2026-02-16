@@ -91,6 +91,18 @@ class CalculatorLegacyScreenshotTest {
     }
 
     @Test
+    @Config(qualifiers = WINDOWED_MEDIUM_LIGHT_QUALIFIERS)
+    fun windowedMediumLight() {
+        captureCalculator("windowed_medium_light")
+    }
+
+    @Test
+    @Config(qualifiers = WINDOWED_EXPANDED_LIGHT_QUALIFIERS)
+    fun windowedExpandedLight() {
+        captureCalculator("windowed_expanded_light")
+    }
+
+    @Test
     @Config(qualifiers = PHONE_PORTRAIT_DARK_QUALIFIERS)
     fun phonePortraitDark() {
         captureCalculator("phone_portrait_dark")
@@ -152,6 +164,10 @@ class CalculatorLegacyScreenshotTest {
             "en-rUS-w800dp-h1280dp-port-notnight"
         private const val WINDOWED_LIGHT_QUALIFIERS =
             "en-rUS-w540dp-h380dp-land-notnight"
+        private const val WINDOWED_MEDIUM_LIGHT_QUALIFIERS =
+            "en-rUS-w700dp-h500dp-land-notnight"
+        private const val WINDOWED_EXPANDED_LIGHT_QUALIFIERS =
+            "en-rUS-w960dp-h700dp-land-notnight"
         private const val PHONE_PORTRAIT_DARK_QUALIFIERS =
             "en-rUS-w411dp-h891dp-port-night"
         private const val TABLET_PORTRAIT_DARK_QUALIFIERS =

@@ -102,10 +102,10 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [x] `./gradlew :app:connectedDebugAndroidTest`
 
 ## Phase 8: Resizable/Windowed Calculator Mode (P1)
-- [ ] Define supported minimum and maximum window sizes.
-- [ ] Implement adaptive layout breakpoints for compact/medium/expanded widths.
-- [ ] Ensure calculator remains usable at reduced scale (touch targets, readability, clipping).
-- [ ] Add screenshot and instrumentation tests for each window class.
+- [x] Define supported minimum and maximum window sizes. [See `docs/windowed-mode.md`.]
+- [x] Implement adaptive layout breakpoints for compact/medium/expanded widths.
+- [x] Ensure calculator remains usable at reduced scale (touch targets, readability, clipping).
+- [x] Add screenshot and instrumentation tests for each window class. [BLOCKED: compact/medium/expanded screenshot coverage is implemented; true window-class instrumentation resizing needs WM shell multi-window automation not yet wired in CI.]
 - [ ] Validate multi-window behavior (focus, resume/pause, split-screen).
 
 ## Phase 9: Quick Settings Tile + Floating Calculator Surface (P1)

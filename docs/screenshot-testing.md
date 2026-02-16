@@ -18,6 +18,8 @@ the pre-Compose calculator UI.
 - phone landscape/light
 - tablet portrait/light
 - compact windowed/light
+- medium windowed/light
+- expanded windowed/light
 - phone portrait/dark
 - tablet portrait/dark
 - phone portrait/large-font
