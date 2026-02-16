@@ -61,8 +61,9 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [ ] Convert remaining Java unit/instrumentation tests to Kotlin.
 - [ ] Remove Java-only utility patterns; replace with idiomatic Kotlin equivalents.
 - [ ] Enable strict Kotlin compiler checks (nullability and warning escalation as appropriate).
-- [ ] Add static quality tools for Kotlin (`ktlint`, `detekt`, optional binary compatibility checks).
-- [ ] Add `ktlintCheck` and `ktlintFormat` tasks at root and module level.
+- [ ] Add static quality tools for Kotlin (`ktlint` with Android style, `detekt`, optional binary compatibility checks).
+- [ ] Configure `.editorconfig` for `ktlint` Android style (`ktlint_code_style=android_studio`).
+- [ ] Add `ktlintCheck` and `ktlintFormat` tasks at root and module level using Android style rules.
 - [ ] Enforce `ktlintCheck` in CI and pre-push validation flow.
 - [ ] Remove all Java sources from active modules.
 - [ ] Verify full test suite parity after each conversion step.
