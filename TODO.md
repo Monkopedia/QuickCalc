@@ -90,16 +90,16 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 
 ## Phase 7: Instrumentation/E2E Testing (Comprehensive) (P0)
 - [x] Build instrumentation smoke suite for app launch, core input, and result rendering. [Implemented in `app/src/androidTest/java/com/android/calculator2/CalculatorSmokeInstrumentedTest.kt`.]
-- [ ] Add comprehensive interaction tests for:
-- [ ] all digit/operator paths
-- [ ] orientation changes and process recreation
-- [ ] background/foreground lifecycle transitions
-- [ ] copy/paste and accessibility actions
+- [x] Add comprehensive interaction tests for:
+- [x] all digit/operator paths
+- [x] orientation changes and process recreation
+- [x] background/foreground lifecycle transitions
+- [x] copy/paste and accessibility actions
 - [ ] Add Compose UI tests for migrated screens.
 - [ ] Add macrobenchmark/startup/perf tests for critical flows.
-- [ ] Ensure connected tests run in CI for at least one stable emulator image.
-- [ ] Provide one-command execution:
-- [ ] `./gradlew :app:connectedDebugAndroidTest`
+- [x] Ensure connected tests run in CI for at least one stable emulator image.
+- [x] Provide one-command execution:
+- [x] `./gradlew :app:connectedDebugAndroidTest`
 
 ## Phase 8: Resizable/Windowed Calculator Mode (P1)
 - [ ] Define supported minimum and maximum window sizes.
