@@ -15,3 +15,9 @@ jobs:
 
       - name: Validate license headers
         run: ./scripts/check_license_headers.sh
+
+      - name: Run ktlint
+        run: ./gradlew ktlintCheck --no-daemon
+
+      - name: Run detekt
+        run: ./gradlew detektCheck --no-daemon

@@ -11,4 +11,24 @@ tasks.register<Exec>("checkLicenseHeaders") {
 
 tasks.named("check") {
     dependsOn("checkLicenseHeaders")
+    dependsOn(":app:ktlintCheck")
+    dependsOn(":app:detektCheck")
+}
+
+tasks.register("ktlintCheck") {
+    group = "verification"
+    description = "Runs ktlint checks for all modules."
+    dependsOn(":app:ktlintCheck")
+}
+
+tasks.register("ktlintFormat") {
+    group = "formatting"
+    description = "Formats Kotlin files for all modules."
+    dependsOn(":app:ktlintFormat")
+}
+
+tasks.register("detektCheck") {
+    group = "verification"
+    description = "Runs detekt checks for all modules."
+    dependsOn(":app:detektCheck")
 }

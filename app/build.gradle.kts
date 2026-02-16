@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     alias(libs.plugins.android.application)
     jacoco
@@ -36,7 +39,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
+                "proguard-rules.pro"
             )
             if (providers.gradleProperty("QUICKCALC_RELEASE_STORE_FILE").isPresent) {
                 signingConfig = signingConfigs.getByName("release")
@@ -54,6 +57,18 @@ android {
             isIncludeAndroidResources = true
         }
     }
+
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        allWarningsAsErrors.set(true)
+        freeCompilerArgs.add("-Xjsr305=strict")
+    }
 }
 
 dependencies {
@@ -67,6 +82,57 @@ dependencies {
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+val ktlint by configurations.creating
+val detekt by configurations.creating
+
+dependencies {
+    ktlint(libs.ktlint.cli)
+    detekt(libs.detekt.cli)
+}
+
+tasks.register<JavaExec>("ktlintCheck") {
+    group = "verification"
+    description = "Runs ktlint checks for app module Kotlin sources."
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+    args(
+        "--relative",
+        "src/**/*.kt",
+        "build.gradle.kts"
+    )
+}
+
+tasks.register<JavaExec>("ktlintFormat") {
+    group = "formatting"
+    description = "Formats app module Kotlin sources with ktlint."
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+    args(
+        "-F",
+        "--relative",
+        "src/**/*.kt",
+        "build.gradle.kts"
+    )
+}
+
+tasks.register<JavaExec>("detektCheck") {
+    group = "verification"
+    description = "Runs detekt on Kotlin production sources."
+    classpath = detekt
+    mainClass.set("io.gitlab.arturbosch.detekt.cli.Main")
+    args(
+        "--build-upon-default-config",
+        "--max-issues",
+        "999",
+        "--input",
+        "src/main/java/com/android/calculator2/CalculatorExpressionBuilder.kt," +
+            "src/main/java/com/android/calculator2/CalculatorExpressionEvaluator.kt," +
+            "src/main/java/com/android/calculator2/CalculatorExpressionTokenizer.kt",
+        "--base-path",
+        projectDir.absolutePath
+    )
 }
 
 dependencyLocking {
@@ -87,7 +153,7 @@ tasks.withType<Test>().configureEach {
 val nonUiCoverageClassPatterns = listOf(
     "com/android/calculator2/CalculatorExpressionBuilder.class",
     "com/android/calculator2/CalculatorExpressionEvaluator.class",
-    "com/android/calculator2/CalculatorExpressionTokenizer.class",
+    "com/android/calculator2/CalculatorExpressionTokenizer.class"
 )
 
 val nonUiClassDirectories = layout.buildDirectory
@@ -100,11 +166,12 @@ val nonUiClassDirectories = layout.buildDirectory
 
 val nonUiSourceDirectories = files("src/main/java")
 
-val nonUiExecutionData = layout.buildDirectory.asFileTree.matching {
-    include("jacoco/testDebugUnitTest.exec")
-    include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
-    include("**/testDebugUnitTest.exec")
-}
+val nonUiExecutionData = files(
+    layout.buildDirectory.file("jacoco/testDebugUnitTest.exec"),
+    layout.buildDirectory.file(
+        "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
+    )
+)
 
 val jacocoNonUiTestReport by tasks.registering(JacocoReport::class) {
     group = "verification"

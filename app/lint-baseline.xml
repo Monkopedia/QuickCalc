@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.0.1" type="baseline" client="gradle" dependencies="false" name="AGP (9.0.1)" variant="all" version="9.0.1">
+
+    <issue
+        id="GestureBackNavigation"
+        message="`onBackPressed` is no longer called for back gestures; migrate to AndroidX&apos;s backward compatible `OnBackPressedDispatcher`"
+        errorLine1="    public void onBackPressed() {"
+        errorLine2="                ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/android/calculator2/Calculator.java"
+            line="199"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="DuplicateIncludedIds"
+        message="Duplicate id @+id/eq, defined or included multiple times in layout/activity_calculator_land.xml: [layout/activity_calculator_land.xml => layout/pad_numeric.xml defines @+id/eq, layout/activity_calculator_land.xml => layout/pad_operator_two_col.xml defines @+id/eq]"
+        errorLine1="        &lt;include layout=&quot;@layout/pad_operator_two_col&quot; />"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_calculator_land.xml"
+            line="35"
+            column="9"
+            message="Duplicate id @+id/eq, defined or included multiple times in layout/activity_calculator_land.xml: [layout/activity_calculator_land.xml => layout/pad_numeric.xml defines @+id/eq, layout/activity_calculator_land.xml => layout/pad_operator_two_col.xml defines @+id/eq]"/>
+        <location
+            file="src/main/res/layout/pad_numeric.xml"
+            line="82"
+            column="9"
+            message="Defined here, included via layout/activity_calculator_land.xml => layout/pad_numeric.xml defines @+id/eq"/>
+        <location
+            file="src/main/res/layout/pad_operator_two_col.xml"
+            line="74"
+            column="9"
+            message="Defined here, included via layout/activity_calculator_land.xml => layout/pad_operator_two_col.xml defines @+id/eq"/>
+    </issue>
+
+    <issue
+        id="DuplicateIncludedIds"
+        message="Duplicate id @+id/eq, defined or included multiple times in layout/activity_calculator_tablet_port.xml: [layout/activity_calculator_tablet_port.xml => layout/pad_numeric.xml defines @+id/eq, layout/activity_calculator_tablet_port.xml => layout/pad_operator_two_col.xml defines @+id/eq]"
+        errorLine1="        &lt;include layout=&quot;@layout/pad_operator_two_col&quot; />"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/activity_calculator_tablet_port.xml"
+            line="34"
+            column="9"
+            message="Duplicate id @+id/eq, defined or included multiple times in layout/activity_calculator_tablet_port.xml: [layout/activity_calculator_tablet_port.xml => layout/pad_numeric.xml defines @+id/eq, layout/activity_calculator_tablet_port.xml => layout/pad_operator_two_col.xml defines @+id/eq]"/>
+        <location
+            file="src/main/res/layout/pad_numeric.xml"
+            line="82"
+            column="9"
+            message="Defined here, included via layout/activity_calculator_tablet_port.xml => layout/pad_numeric.xml defines @+id/eq"/>
+        <location
+            file="src/main/res/layout/pad_operator_two_col.xml"
+            line="74"
+            column="9"
+            message="Defined here, included via layout/activity_calculator_tablet_port.xml => layout/pad_operator_two_col.xml defines @+id/eq"/>
+    </issue>
+
+    <issue
+        id="MissingInflatedId"
+        message="`@layout/activity_calculator` does not contain a declaration with id `display`"
+        errorLine1="        mDisplayView = findViewById(R.id.display);"
+        errorLine2="                                    ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/android/calculator2/Calculator.java"
+            line="126"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="MissingInflatedId"
+        message="`@layout/activity_calculator` does not contain a declaration with id `formula`"
+        errorLine1="        mFormulaEditText = (CalculatorEditText) findViewById(R.id.formula);"
+        errorLine2="                                                             ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/android/calculator2/Calculator.java"
+            line="127"
+            column="62"/>
+    </issue>
+
+    <issue
+        id="MissingInflatedId"
+        message="`@layout/activity_calculator` does not contain a declaration with id `result`"
+        errorLine1="        mResultEditText = (CalculatorEditText) findViewById(R.id.result);"
+        errorLine2="                                                            ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/android/calculator2/Calculator.java"
+            line="128"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="MissingInflatedId"
+        message="`@layout/activity_calculator` does not contain a declaration with id `pad_pager`"
+        errorLine1="        mPadViewPager = (ViewPager) findViewById(R.id.pad_pager);"
+        errorLine2="                                                 ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/android/calculator2/Calculator.java"
+            line="129"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="MissingInflatedId"
+        message="`@layout/activity_calculator` does not contain a declaration with id `del`"
+        errorLine1="        mDeleteButton = findViewById(R.id.del);"
+        errorLine2="                                     ~~~~~~~~">
+        <location
+            file="src/main/java/com/android/calculator2/Calculator.java"
+            line="130"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="MissingInflatedId"
+        message="`@layout/activity_calculator` does not contain a declaration with id `clr`"
+        errorLine1="        mClearButton = findViewById(R.id.clr);"
+        errorLine2="                                    ~~~~~~~~">
+        <location
+            file="src/main/java/com/android/calculator2/Calculator.java"
+            line="131"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="MissingInflatedId"
+        message="`@layout/activity_calculator` does not contain a declaration with id `pad_numeric`"
+        errorLine1="        mEqualButton = findViewById(R.id.pad_numeric).findViewById(R.id.eq);"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/android/calculator2/Calculator.java"
+            line="133"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="RedundantLabel"
+        message="Redundant label can be removed"
+        errorLine1="            android:label=&quot;@string/app_name&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.viewpager:viewpager than 1.0.0 is available: 1.1.0"
+        errorLine1="viewpager = &quot;1.0.0&quot;"
+        errorLine2="            ~~~~~~~">
+        <location
+            file="$HOME/QuickCalc/gradle/libs.versions.toml"
+            line="4"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.compose:compose-bom than 2025.10.00 is available: 2026.02.00"
+        errorLine1="composeBom = &quot;2025.10.00&quot;"
+        errorLine2="             ~~~~~~~~~~~~">
+        <location
+            file="$HOME/QuickCalc/gradle/libs.versions.toml"
+            line="12"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.robolectric:robolectric than 4.13 is available: 4.16.1"
+        errorLine1="robolectric = &quot;4.13&quot;"
+        errorLine2="              ~~~~~~">
+        <location
+            file="$HOME/QuickCalc/gradle/libs.versions.toml"
+            line="9"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of com.pinterest.ktlint:ktlint-cli than 1.3.1 is available: 1.8.0"
+        errorLine1="ktlintCli = &quot;1.3.1&quot;"
+        errorLine2="            ~~~~~~~">
+        <location
+            file="$HOME/QuickCalc/gradle/libs.versions.toml"
+            line="10"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;app_name&quot; is not translated in &quot;ky&quot; (Kyrgyz)"
+        errorLine1="    &lt;string name=&quot;app_name&quot;>Calculator&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/display_background_color` with a theme that also paints a background (inferred theme is `@style/CalculatorTheme`)"
+        errorLine1="    android:background=&quot;@color/display_background_color&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/display.xml"
+            line="23"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/pad_advanced_background_color` with a theme that also paints a background (inferred theme is `@style/CalculatorTheme`)"
+        errorLine1="    android:background=&quot;@color/pad_advanced_background_color&quot;>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/pad_advanced.xml"
+            line="22"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/pad_numeric_background_color` with a theme that also paints a background (inferred theme is `@style/CalculatorTheme`)"
+        errorLine1="    android:background=&quot;@color/pad_numeric_background_color&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/pad_numeric.xml"
+            line="22"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/pad_operator_background_color` with a theme that also paints a background (inferred theme is `@style/CalculatorTheme`)"
+        errorLine1="    android:background=&quot;@color/pad_operator_background_color&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/pad_operator_one_col.xml"
+            line="22"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/pad_operator_background_color` with a theme that also paints a background (inferred theme is `@style/CalculatorTheme`)"
+        errorLine1="    android:background=&quot;@color/pad_operator_background_color&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/pad_operator_two_col.xml"
+            line="22"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.desc_dec_point` appears to be unused"
+        errorLine1="    &lt;string name=&quot;desc_dec_point&quot;>point&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="53"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="ClickableViewAccessibility"
+        message="Custom view `CalculatorEditText` overrides `onTouchEvent` but not `performClick`"
+        errorLine1="    public boolean onTouchEvent(MotionEvent event) {"
+        errorLine2="                   ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/android/calculator2/CalculatorEditText.java"
+            line="103"
+            column="20"/>
+    </issue>
+
+</issues>
