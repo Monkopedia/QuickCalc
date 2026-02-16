@@ -16,7 +16,7 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [x] Add `docs/license-compliance.md` explaining license obligations and attribution requirements.
 - [x] Run dependency/license scan and document unresolved findings.
 - [x] Verify every source file retains valid license header where required.
-- [ ] Add automated license/header linting (SPDX or approved header policy) and fail CI on violations.
+- [x] Add automated license/header linting (SPDX or approved header policy) and fail CI on violations.
 
 ## Phase 1: Gradle and Toolchain Modernization (P0)
 - [ ] Create Gradle project structure for Android Studio compatibility (`settings.gradle.kts`, root build logic, `app/`).

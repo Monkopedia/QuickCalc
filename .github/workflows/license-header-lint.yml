@@ -1,0 +1,17 @@
+name: License Header Lint
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  license-header-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate license headers
+        run: ./scripts/check_license_headers.sh
