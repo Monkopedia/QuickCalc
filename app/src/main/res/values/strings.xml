@@ -19,6 +19,8 @@
 
     <!-- Name of the application. [CHAR_LIMIT=NONE] -->
     <string name="app_name">Calculator</string>
+    <!-- Label shown in Quick Settings tile picker/list. -->
+    <string name="quick_settings_tile_label" translatable="false">Calculator</string>
 
     <!-- Error displayed when expression evaluates to NaN. [CHAR_LIMIT=14] -->
     <string name="error_nan">Not a number</string>

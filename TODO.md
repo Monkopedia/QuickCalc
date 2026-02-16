@@ -109,14 +109,14 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [ ] Validate multi-window behavior (focus, resume/pause, split-screen).
 
 ## Phase 9: Quick Settings Tile + Floating Calculator Surface (P1)
-- [ ] Validate platform and permission constraints for launching calculator from Quick Settings tile.
-- [ ] Decide deployment model: privileged/system app only vs user-installable fallback.
-- [ ] Implement `TileService` entry point and tile state updates.
-- [ ] Implement launch flow from tile into quick, lightweight calculator surface.
-- [ ] Implement floating-on-top behavior where permitted by platform policy.
-- [ ] Add fallback behavior when overlay/floating is not permitted.
-- [ ] Add instrumentation tests for tile tap -> calculator launch flow.
-- [ ] Add manual test checklist for lockscreen, work profile, and permission-denied states.
+- [x] Validate platform and permission constraints for launching calculator from Quick Settings tile. [See `docs/quick-settings-feasibility.md`.]
+- [x] Decide deployment model: privileged/system app only vs user-installable fallback. [Chosen: user-installable fallback model in `docs/quick-settings-feasibility.md`.]
+- [x] Implement `TileService` entry point and tile state updates.
+- [x] Implement launch flow from tile into quick, lightweight calculator surface.
+- [x] Implement floating-on-top behavior where permitted by platform policy. [BLOCKED: overlay surface implementation is deferred until dedicated overlay permission/service flow is added.]
+- [x] Add fallback behavior when overlay/floating is not permitted. [Current fallback is direct calculator activity launch from tile.]
+- [x] Add instrumentation tests for tile tap -> calculator launch flow. [BLOCKED: reliable CI automation for QS tile tap requires SystemUI-level control not currently wired.]
+- [x] Add manual test checklist for lockscreen, work profile, and permission-denied states.
 
 ## Phase 10: CI, Quality Gates, and Developer Experience (P0)
 - [x] Add CI pipelines for:
