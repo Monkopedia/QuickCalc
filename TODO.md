@@ -96,7 +96,7 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [x] background/foreground lifecycle transitions
 - [x] copy/paste and accessibility actions
 - [x] Add Compose UI tests for migrated screens. [BLOCKED: Compose screen migration is not yet started, so there are no migrated Compose screens to target.]
-- [ ] Add macrobenchmark/startup/perf tests for critical flows.
+- [x] Add macrobenchmark/startup/perf tests for critical flows. [Implemented startup/evaluator perf instrumentation tests in `app/src/androidTest/java/com/android/calculator2/CalculatorPerfInstrumentedTest.kt`.]
 - [x] Ensure connected tests run in CI for at least one stable emulator image.
 - [x] Provide one-command execution:
 - [x] `./gradlew :app:connectedDebugAndroidTest`
