@@ -30,18 +30,18 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [x] Make baseline builds pass:
 - [x] `./gradlew :app:assembleDebug`
 - [x] `./gradlew :app:assembleRelease`
-- [ ] Fix all build warnings that indicate future incompatibility or deprecation risk.
+- [ ] Fix all build warnings that indicate future incompatibility or deprecation risk. [BLOCKED: AOSP legacy Java uses deprecated framework APIs; full cleanup is coupled to Kotlin migration/Compose port to avoid risky behavior drift.]
 - [x] Add reproducible dependency resolution with lockfiles/version catalog.
 
 ## Phase 2: Baseline Behavior Capture Before Large Refactors (P0)
-- [ ] Catalog existing features and edge-case behavior in `docs/behavior-baseline.md`.
-- [ ] Record expected calculator behavior for:
-- [ ] basic arithmetic and operator precedence
-- [ ] unary operations and sign toggling
-- [ ] divide-by-zero and malformed expression states
-- [ ] large number handling and precision limits
-- [ ] memory/history behavior
-- [ ] Define parity acceptance criteria for migration steps.
+- [x] Catalog existing features and edge-case behavior in `docs/behavior-baseline.md`.
+- [x] Record expected calculator behavior for:
+- [x] basic arithmetic and operator precedence
+- [x] unary operations and sign toggling
+- [x] divide-by-zero and malformed expression states
+- [x] large number handling and precision limits
+- [x] memory/history behavior
+- [x] Define parity acceptance criteria for migration steps.
 
 ## Phase 3: Non-UI Test Buildout (As Complete as Possible) (P0)
 - [ ] Import any existing upstream non-UI tests.
