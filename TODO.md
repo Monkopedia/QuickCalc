@@ -89,7 +89,7 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [ ] Remove legacy XML/View code only after parity sign-off.
 
 ## Phase 7: Instrumentation/E2E Testing (Comprehensive) (P0)
-- [ ] Build instrumentation smoke suite for app launch, core input, and result rendering.
+- [x] Build instrumentation smoke suite for app launch, core input, and result rendering. [Implemented in `app/src/androidTest/java/com/android/calculator2/CalculatorSmokeInstrumentedTest.kt`.]
 - [ ] Add comprehensive interaction tests for:
 - [ ] all digit/operator paths
 - [ ] orientation changes and process recreation
