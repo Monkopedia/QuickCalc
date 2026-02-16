@@ -19,19 +19,19 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [x] Add automated license/header linting (SPDX or approved header policy) and fail CI on violations.
 
 ## Phase 1: Gradle and Toolchain Modernization (P0)
-- [ ] Create Gradle project structure for Android Studio compatibility (`settings.gradle.kts`, root build logic, `app/`).
-- [ ] Upgrade to latest stable versions at implementation time:
-- [ ] Gradle wrapper.
-- [ ] Android Gradle Plugin.
-- [ ] Kotlin plugin.
-- [ ] AndroidX/Compose BOM (where applicable).
-- [ ] Configure compile SDK and target SDK to latest stable API level.
-- [ ] Add build variants (`debug`, `release`) and signing placeholders.
-- [ ] Make baseline builds pass:
-- [ ] `./gradlew :app:assembleDebug`
-- [ ] `./gradlew :app:assembleRelease`
+- [x] Create Gradle project structure for Android Studio compatibility (`settings.gradle.kts`, root build logic, `app/`).
+- [x] Upgrade to latest stable versions at implementation time:
+- [x] Gradle wrapper.
+- [x] Android Gradle Plugin.
+- [ ] Kotlin plugin. [BLOCKED: AGP 9 provides built-in Kotlin support; no separate Kotlin Android plugin is required.]
+- [x] AndroidX/Compose BOM (where applicable).
+- [x] Configure compile SDK and target SDK to latest stable API level.
+- [x] Add build variants (`debug`, `release`) and signing placeholders.
+- [x] Make baseline builds pass:
+- [x] `./gradlew :app:assembleDebug`
+- [x] `./gradlew :app:assembleRelease`
 - [ ] Fix all build warnings that indicate future incompatibility or deprecation risk.
-- [ ] Add reproducible dependency resolution with lockfiles/version catalog.
+- [x] Add reproducible dependency resolution with lockfiles/version catalog.
 
 ## Phase 2: Baseline Behavior Capture Before Large Refactors (P0)
 - [ ] Catalog existing features and edge-case behavior in `docs/behavior-baseline.md`.
