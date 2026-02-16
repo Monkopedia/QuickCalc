@@ -16,6 +16,7 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [ ] Add `docs/license-compliance.md` explaining license obligations and attribution requirements.
 - [ ] Run dependency/license scan and document unresolved findings.
 - [ ] Verify every source file retains valid license header where required.
+- [ ] Add automated license/header linting (SPDX or approved header policy) and fail CI on violations.
 
 ## Phase 1: Gradle and Toolchain Modernization (P0)
 - [ ] Create Gradle project structure for Android Studio compatibility (`settings.gradle.kts`, root build logic, `app/`).
@@ -61,6 +62,8 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [ ] Remove Java-only utility patterns; replace with idiomatic Kotlin equivalents.
 - [ ] Enable strict Kotlin compiler checks (nullability and warning escalation as appropriate).
 - [ ] Add static quality tools for Kotlin (`ktlint`, `detekt`, optional binary compatibility checks).
+- [ ] Add `ktlintCheck` and `ktlintFormat` tasks at root and module level.
+- [ ] Enforce `ktlintCheck` in CI and pre-push validation flow.
 - [ ] Remove all Java sources from active modules.
 - [ ] Verify full test suite parity after each conversion step.
 
@@ -119,6 +122,7 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [ ] build
 - [ ] unit tests
 - [ ] lint/static analysis
+- [ ] license/header linting
 - [ ] screenshot tests
 - [ ] instrumentation tests
 - [ ] Enforce fail-fast quality gates (no lint/test/screenshot regressions on main).
