@@ -14,7 +14,7 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [x] Preserve upstream provenance metadata (source URL, branch, imported revision hash, import date).
 - [x] Import all licensing artifacts from upstream (`LICENSE`, `NOTICE`, headers, third-party notices).
 - [x] Add `docs/license-compliance.md` explaining license obligations and attribution requirements.
-- [ ] Run dependency/license scan and document unresolved findings.
+- [x] Run dependency/license scan and document unresolved findings.
 - [ ] Verify every source file retains valid license header where required.
 - [ ] Add automated license/header linting (SPDX or approved header policy) and fail CI on violations.
 
