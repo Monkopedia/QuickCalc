@@ -135,7 +135,7 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [ ] Verify accessibility (TalkBack labels, contrast, focus order, large text).
 - [ ] Verify localization behavior and number formatting assumptions.
 - [ ] Run security/privacy review for any overlay/tile behavior.
-- [ ] Create `docs/release-checklist.md` and complete dry-run release.
+- [x] Create `docs/release-checklist.md` and complete dry-run release.
 - [ ] Tag first milestone release after all P0 gates pass.
 
 ## Definition of Done
