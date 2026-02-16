@@ -80,7 +80,7 @@ Scope source: AOSP Calculator at `https://android.googlesource.com/platform/pack
 - [x] Gate UI regressions with image diff thresholds and review workflow.
 
 ## Phase 6: Jetpack Compose UI Port with Parity Gates (P0)
-- [ ] Define UI architecture for Compose (state holders, events, navigation boundaries).
+- [x] Define UI architecture for Compose (state holders, events, navigation boundaries). [See `docs/compose-ui-architecture.md`.]
 - [ ] Port screens/components incrementally from Views to Compose.
 - [ ] Preserve behavior and interaction parity using baseline tests.
 - [ ] Add Roborazzi-based screenshot tests for each migrated screen/state.
