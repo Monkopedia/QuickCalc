@@ -25,7 +25,6 @@ jobs:
         with:
           api-level: 34
           arch: x86_64
-          profile: pixel_8_pro
           script: ./gradlew :app:connectedDebugAndroidTest --no-daemon
 
       - name: Upload connected test reports
