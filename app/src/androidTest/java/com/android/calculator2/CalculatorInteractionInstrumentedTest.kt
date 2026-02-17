@@ -21,7 +21,6 @@ import android.content.pm.ActivityInfo
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.lifecycle.Lifecycle
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -152,8 +151,10 @@ class CalculatorInteractionInstrumentedTest {
     }
 
     private fun tap(vararg viewIds: Int) {
-        viewIds.forEach { viewId ->
-            onView(withId(viewId)).perform(click())
+        scenarioRule.scenario.onActivity { activity ->
+            viewIds.forEach { viewId ->
+                activity.findViewById<android.view.View>(viewId).performClick()
+            }
         }
     }
 }
