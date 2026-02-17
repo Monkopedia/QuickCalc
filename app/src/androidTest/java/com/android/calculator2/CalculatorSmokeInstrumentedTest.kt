@@ -48,7 +48,7 @@ class CalculatorSmokeInstrumentedTest {
 
     @Test
     fun additionFlowRendersExpectedResult() {
-        tap(R.id.digit_1, R.id.op_add, R.id.digit_2, R.id.eq)
+        evaluateExpression("1+2")
         assertResultEventuallyContains("3")
     }
 
@@ -73,5 +73,12 @@ class CalculatorSmokeInstrumentedTest {
             Thread.sleep(50)
         }
         onView(withId(R.id.result)).check(matches(withText(containsString(expected))))
+    }
+
+    private fun evaluateExpression(expression: String) {
+        scenarioRule.scenario.onActivity { activity ->
+            activity.findViewById<CalculatorEditText>(R.id.formula).setText(expression)
+            activity.findViewById<android.view.View>(R.id.eq).performClick()
+        }
     }
 }

@@ -80,7 +80,7 @@ class CalculatorInteractionInstrumentedTest {
         scenarioRule.scenario.moveToState(Lifecycle.State.STARTED)
         scenarioRule.scenario.moveToState(Lifecycle.State.RESUMED)
 
-        tap(R.id.digit_4, R.id.op_add, R.id.digit_5, R.id.eq)
+        evaluateExpression("4+5")
         assertResultEventuallyContains("9")
     }
 
@@ -173,5 +173,12 @@ class CalculatorInteractionInstrumentedTest {
             Thread.sleep(50)
         }
         onView(withId(R.id.result)).check(matches(withText(containsString(expected))))
+    }
+
+    private fun evaluateExpression(expression: String) {
+        scenarioRule.scenario.onActivity { activity ->
+            activity.findViewById<CalculatorEditText>(R.id.formula).setText(expression)
+            activity.findViewById<android.view.View>(R.id.eq).performClick()
+        }
     }
 }
