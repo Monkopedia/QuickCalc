@@ -18,9 +18,11 @@ package com.android.calculator2
 
 import android.content.ClipboardManager
 import android.content.pm.ActivityInfo
+import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.lifecycle.Lifecycle
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -79,7 +81,7 @@ class CalculatorInteractionInstrumentedTest {
         scenarioRule.scenario.moveToState(Lifecycle.State.RESUMED)
 
         tap(R.id.digit_4, R.id.op_add, R.id.digit_5, R.id.eq)
-        onView(withId(R.id.result)).check(matches(withText(containsString("9"))))
+        assertResultEventuallyContains("9")
     }
 
     @Test
@@ -151,10 +153,25 @@ class CalculatorInteractionInstrumentedTest {
     }
 
     private fun tap(vararg viewIds: Int) {
-        scenarioRule.scenario.onActivity { activity ->
-            viewIds.forEach { viewId ->
-                activity.findViewById<android.view.View>(viewId).performClick()
-            }
+        viewIds.forEach { viewId ->
+            onView(withId(viewId)).perform(click())
         }
+    }
+
+    private fun assertResultEventuallyContains(expected: String, timeoutMs: Long = 5_000) {
+        val deadline = SystemClock.elapsedRealtime() + timeoutMs
+        var latestResult = ""
+        while (SystemClock.elapsedRealtime() < deadline) {
+            scenarioRule.scenario.onActivity { activity ->
+                latestResult = activity.findViewById<CalculatorEditText>(R.id.result)
+                    .text
+                    .toString()
+            }
+            if (latestResult.contains(expected)) {
+                return
+            }
+            Thread.sleep(50)
+        }
+        onView(withId(R.id.result)).check(matches(withText(containsString(expected))))
     }
 }

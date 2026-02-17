@@ -16,7 +16,9 @@
 
 package com.android.calculator2
 
+import android.os.SystemClock
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -47,14 +49,29 @@ class CalculatorSmokeInstrumentedTest {
     @Test
     fun additionFlowRendersExpectedResult() {
         tap(R.id.digit_1, R.id.op_add, R.id.digit_2, R.id.eq)
-        onView(withId(R.id.result)).check(matches(withText(containsString("3"))))
+        assertResultEventuallyContains("3")
     }
 
     private fun tap(vararg viewIds: Int) {
-        scenarioRule.scenario.onActivity { activity ->
-            viewIds.forEach { viewId ->
-                activity.findViewById<android.view.View>(viewId).performClick()
-            }
+        viewIds.forEach { viewId ->
+            onView(withId(viewId)).perform(click())
         }
+    }
+
+    private fun assertResultEventuallyContains(expected: String, timeoutMs: Long = 5_000) {
+        val deadline = SystemClock.elapsedRealtime() + timeoutMs
+        var latestResult = ""
+        while (SystemClock.elapsedRealtime() < deadline) {
+            scenarioRule.scenario.onActivity { activity ->
+                latestResult = activity.findViewById<CalculatorEditText>(R.id.result)
+                    .text
+                    .toString()
+            }
+            if (latestResult.contains(expected)) {
+                return
+            }
+            Thread.sleep(50)
+        }
+        onView(withId(R.id.result)).check(matches(withText(containsString(expected))))
     }
 }
