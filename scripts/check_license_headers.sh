@@ -35,12 +35,23 @@ if [[ "${#candidate_files[@]}" -eq 0 ]]; then
   exit 0
 fi
 
+if command -v rg >/dev/null 2>&1; then
+  contains_license_marker() {
+    local file="$1"
+    rg -q --fixed-strings "Licensed under the Apache License" "$file" ||
+      rg -q --fixed-strings "SPDX-License-Identifier:" "$file"
+  }
+else
+  contains_license_marker() {
+    local file="$1"
+    grep -qF "Licensed under the Apache License" "$file" ||
+      grep -qF "SPDX-License-Identifier:" "$file"
+  }
+fi
+
 missing_headers=()
 for f in "${candidate_files[@]}"; do
-  if rg -q --fixed-strings "Licensed under the Apache License" "$f"; then
-    continue
-  fi
-  if rg -q --fixed-strings "SPDX-License-Identifier:" "$f"; then
+  if contains_license_marker "$f"; then
     continue
   fi
   missing_headers+=("$f")
