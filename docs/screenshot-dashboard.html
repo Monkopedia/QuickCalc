@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuickCalc Screenshot Dashboard</title>
+  <style>
+    :root {
+      --bg: #f4f2ed;
+      --surface: #ffffff;
+      --ink: #1e2430;
+      --muted: #596274;
+      --line: #d8dce5;
+      --accent: #1f6feb;
+      --ok: #137333;
+      --warn: #a50e0e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 0%, #e7edf8 0%, transparent 40%),
+        radial-gradient(circle at 88% 0%, #f8e9d5 0%, transparent 42%),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    .shell {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 8px 22px rgba(25, 33, 48, 0.06);
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    h2 {
+      margin: 0 0 10px 0;
+      font-size: 20px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .summary-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    input[type="checkbox"] {
+      transform: translateY(1px);
+    }
+
+    .badge {
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .badge.pending {
+      color: var(--muted);
+      border-color: var(--line);
+    }
+
+    .badge.ok {
+      color: var(--ok);
+      border-color: var(--ok);
+    }
+
+    .badge.warn {
+      color: var(--warn);
+      border-color: var(--warn);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .summary-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fafbfe;
+    }
+
+    .summary-item .k {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .summary-item .v {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .pairs-feed {
+      display: grid;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .pair-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fcfdff;
+      display: grid;
+      gap: 10px;
+    }
+
+    .pair-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .pair-title {
+      margin: 0 0 4px 0;
+      font-size: 16px;
+    }
+
+    .pair-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(130px, 1fr));
+      gap: 8px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      background: #fff;
+    }
+
+    .stat .k {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stat .v {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .pair-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    figure {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    figure figcaption {
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .img-wrap {
+      background:
+        linear-gradient(45deg, #f1f1f1 25%, transparent 25%, transparent 75%, #f1f1f1 75%),
+        linear-gradient(45deg, #f1f1f1 25%, transparent 25%, transparent 75%, #f1f1f1 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      padding: 10px;
+    }
+
+    img,
+    canvas {
+      max-width: 100%;
+      max-height: 62vh;
+      object-fit: contain;
+      border: 1px solid #e4e7ee;
+      background: #fff;
+    }
+
+    .pair-heatmap {
+      display: none;
+    }
+
+    .show-heatmaps .pair-heatmap {
+      display: block;
+    }
+
+    .list-grid {
+      margin-top: 10px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .list-item {
+      font-size: 13px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fafbfe;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    .empty {
+      font-size: 13px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      color: var(--muted);
+      background: #fafbfe;
+    }
+
+    .error {
+      color: var(--warn);
+      font-size: 12px;
+    }
+
+    @media (max-width: 980px) {
+      .summary-grid,
+      .pair-stats {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+
+      .pair-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<main class="shell">
+  <section class="panel">
+    <h1>Screenshot Comparison Dashboard</h1>
+    <p>All legacy baselines and Compose snapshots are shown side by side for quick visual parity checks.</p>
+  </section>
+
+  <section class="panel">
+    <div class="summary-bar">
+      <label class="toggle">
+        <input id="heatmapToggle" type="checkbox" />
+        Show diff heatmaps for every pair
+      </label>
+      <span id="summaryBadge" class="badge pending">Calculating diff summary...</span>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="k">Pairs</div>
+        <div class="v" id="pairCount">-</div>
+      </div>
+      <div class="summary-item">
+        <div class="k">Within Threshold</div>
+        <div class="v" id="withinCount">-</div>
+      </div>
+      <div class="summary-item">
+        <div class="k">Over Threshold</div>
+        <div class="v" id="overCount">-</div>
+      </div>
+      <div class="summary-item">
+        <div class="k">Load Errors</div>
+        <div class="v" id="errorCount">-</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>All Screenshot Pairs</h2>
+    <p>Each row shows legacy View UI on the left and Compose UI on the right.</p>
+    <div id="pairsFeed" class="pairs-feed"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Unpaired Legacy Baselines</h2>
+    <p>These legacy screenshots currently have no direct Compose baseline pair.</p>
+    <div id="legacyOnlyList" class="list-grid"></div>
+  </section>
+</main>
+
+<script>
+  const THRESHOLD = 0.35;
+
+  const pairs = [
+    {
+      id: "phone-portrait-light-initial",
+      title: "Phone Portrait Light: Initial",
+      legacy: "../app/src/test/screenshots/legacy/phone_portrait_light.png",
+      modern: "../app/src/test/screenshots/compose/phone_portrait_light_initial.png",
+      note: "Direct parity pair used by the Compose parity gate."
+    },
+    {
+      id: "phone-portrait-dark-initial",
+      title: "Phone Portrait Dark: Initial",
+      legacy: "../app/src/test/screenshots/legacy/phone_portrait_dark.png",
+      modern: "../app/src/test/screenshots/compose/phone_portrait_dark_initial.png",
+      note: "Theme parity check for dark mode baseline."
+    },
+    {
+      id: "phone-landscape-light-initial",
+      title: "Phone Landscape Light: Initial",
+      legacy: "../app/src/test/screenshots/legacy/phone_landscape_light.png",
+      modern: "../app/src/test/screenshots/compose/phone_landscape_light_initial.png",
+      note: "Landscape split-layout parity (advanced pad visible without pager)."
+    },
+    {
+      id: "tablet-portrait-light-initial",
+      title: "Tablet Portrait Light: Initial",
+      legacy: "../app/src/test/screenshots/legacy/tablet_portrait_light.png",
+      modern: "../app/src/test/screenshots/compose/tablet_portrait_light_initial.png",
+      note: "Tablet portrait parity with advanced row + numeric/operator row."
+    },
+    {
+      id: "tablet-portrait-dark-initial",
+      title: "Tablet Portrait Dark: Initial",
+      legacy: "../app/src/test/screenshots/legacy/tablet_portrait_dark.png",
+      modern: "../app/src/test/screenshots/compose/tablet_portrait_dark_initial.png",
+      note: "Tablet portrait dark theme parity."
+    },
+    {
+      id: "windowed-light-initial",
+      title: "Windowed Light: Initial",
+      legacy: "../app/src/test/screenshots/legacy/windowed_light.png",
+      modern: "../app/src/test/screenshots/compose/windowed_light_initial.png",
+      note: "Compact window-size parity snapshot."
+    },
+    {
+      id: "windowed-medium-light-initial",
+      title: "Windowed Medium Light: Initial",
+      legacy: "../app/src/test/screenshots/legacy/windowed_medium_light.png",
+      modern: "../app/src/test/screenshots/compose/windowed_medium_light_initial.png",
+      note: "Medium window-size parity snapshot."
+    },
+    {
+      id: "windowed-expanded-light-initial",
+      title: "Windowed Expanded Light: Initial",
+      legacy: "../app/src/test/screenshots/legacy/windowed_expanded_light.png",
+      modern: "../app/src/test/screenshots/compose/windowed_expanded_light_initial.png",
+      note: "Expanded window-size parity snapshot."
+    },
+    {
+      id: "phone-portrait-large-font-initial",
+      title: "Phone Portrait Light: Large Font",
+      legacy: "../app/src/test/screenshots/legacy/phone_portrait_large_font.png",
+      modern: "../app/src/test/screenshots/compose/phone_portrait_large_font_initial.png",
+      note: "Large text accessibility parity snapshot."
+    },
+    {
+      id: "phone-portrait-light-addition",
+      title: "Phone Portrait Light: Evaluated (1+2=)",
+      legacy: "../app/src/test/screenshots/legacy/phone_portrait_light.png",
+      modern: "../app/src/test/screenshots/compose/phone_portrait_light_addition.png",
+      note: "No evaluated-state legacy baseline exists; legacy initial is used as closest reference."
+    }
+  ];
+
+  const legacyOnly = [];
+
+  const summaryBadge = document.getElementById("summaryBadge");
+  const pairCount = document.getElementById("pairCount");
+  const withinCount = document.getElementById("withinCount");
+  const overCount = document.getElementById("overCount");
+  const errorCount = document.getElementById("errorCount");
+  const pairsFeed = document.getElementById("pairsFeed");
+  const legacyOnlyList = document.getElementById("legacyOnlyList");
+  const heatmapToggle = document.getElementById("heatmapToggle");
+
+  heatmapToggle.addEventListener("change", () => {
+    document.body.classList.toggle("show-heatmaps", heatmapToggle.checked);
+  });
+
+  function basename(path) {
+    return path.split("/").pop();
+  }
+
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error(`Failed to load ${src}`));
+      img.src = src;
+    });
+  }
+
+  function formatPercent(value) {
+    return `${(value * 100).toFixed(2)}%`;
+  }
+
+  function computeDiff(legacyImg, modernImg) {
+    const width = Math.min(legacyImg.naturalWidth, modernImg.naturalWidth);
+    const height = Math.min(legacyImg.naturalHeight, modernImg.naturalHeight);
+    const totalPixels = width * height;
+
+    const aCanvas = document.createElement("canvas");
+    aCanvas.width = width;
+    aCanvas.height = height;
+    const aCtx = aCanvas.getContext("2d");
+    aCtx.drawImage(legacyImg, 0, 0, width, height);
+    const aData = aCtx.getImageData(0, 0, width, height).data;
+
+    const bCanvas = document.createElement("canvas");
+    bCanvas.width = width;
+    bCanvas.height = height;
+    const bCtx = bCanvas.getContext("2d");
+    bCtx.drawImage(modernImg, 0, 0, width, height);
+    const bData = bCtx.getImageData(0, 0, width, height).data;
+
+    let diffSum = 0;
+    let changedPixels = 0;
+    const out = new Uint8ClampedArray(aData.length);
+
+    for (let i = 0; i < aData.length; i += 4) {
+      const dr = Math.abs(aData[i] - bData[i]);
+      const dg = Math.abs(aData[i + 1] - bData[i + 1]);
+      const db = Math.abs(aData[i + 2] - bData[i + 2]);
+      diffSum += dr + dg + db;
+      if (dr + dg + db > 0) {
+        changedPixels += 1;
+      }
+      out[i] = dr;
+      out[i + 1] = dg;
+      out[i + 2] = db;
+      out[i + 3] = 255;
+    }
+
+    return {
+      width,
+      height,
+      normalizedDiff: diffSum / (totalPixels * 255 * 3),
+      changedPixels,
+      totalPixels,
+      heatmap: new ImageData(out, width, height)
+    };
+  }
+
+  function makeStat(label) {
+    const stat = document.createElement("div");
+    stat.className = "stat";
+
+    const key = document.createElement("div");
+    key.className = "k";
+    key.textContent = label;
+
+    const value = document.createElement("div");
+    value.className = "v";
+    value.textContent = "-";
+
+    stat.appendChild(key);
+    stat.appendChild(value);
+    return { stat, value };
+  }
+
+  function makeImageFigure(label, path, altText) {
+    const figure = document.createElement("figure");
+
+    const caption = document.createElement("figcaption");
+    const kind = document.createElement("span");
+    kind.textContent = label;
+    const name = document.createElement("span");
+    name.textContent = basename(path);
+    caption.append(kind, name);
+
+    const wrap = document.createElement("div");
+    wrap.className = "img-wrap";
+
+    const image = document.createElement("img");
+    image.src = path;
+    image.alt = altText;
+
+    wrap.appendChild(image);
+    figure.append(caption, wrap);
+    return figure;
+  }
+
+  function createPairCard(pair, index) {
+    const card = document.createElement("article");
+    card.className = "pair-card";
+
+    const head = document.createElement("div");
+    head.className = "pair-head";
+
+    const titleWrap = document.createElement("div");
+    const title = document.createElement("h3");
+    title.className = "pair-title";
+    title.textContent = `${index + 1}. ${pair.title}`;
+
+    const note = document.createElement("p");
+    note.textContent = pair.note || "";
+    titleWrap.append(title, note);
+
+    const status = document.createElement("span");
+    status.className = "badge pending";
+    status.textContent = "Diff pending";
+
+    head.append(titleWrap, status);
+
+    const statsRow = document.createElement("div");
+    statsRow.className = "pair-stats";
+
+    const size = makeStat("Image Size");
+    const diff = makeStat("Normalized Diff");
+    const changed = makeStat("Changed Pixels");
+    const threshold = makeStat("Threshold");
+    threshold.value.textContent = THRESHOLD.toFixed(4);
+
+    statsRow.append(size.stat, diff.stat, changed.stat, threshold.stat);
+
+    const imageGrid = document.createElement("div");
+    imageGrid.className = "pair-grid";
+    imageGrid.append(
+      makeImageFigure("Legacy", pair.legacy, `${pair.title} legacy screenshot`),
+      makeImageFigure("Compose", pair.modern, `${pair.title} compose screenshot`)
+    );
+
+    const heatmapFigure = document.createElement("figure");
+    heatmapFigure.className = "pair-heatmap";
+
+    const heatmapCaption = document.createElement("figcaption");
+    heatmapCaption.textContent = "Diff Heatmap";
+    const heatmapWrap = document.createElement("div");
+    heatmapWrap.className = "img-wrap";
+    const heatmapCanvas = document.createElement("canvas");
+    heatmapWrap.appendChild(heatmapCanvas);
+    heatmapFigure.append(heatmapCaption, heatmapWrap);
+
+    card.append(head, statsRow, imageGrid, heatmapFigure);
+
+    return {
+      card,
+      status,
+      note,
+      sizeValue: size.value,
+      diffValue: diff.value,
+      changedValue: changed.value,
+      heatmapCanvas
+    };
+  }
+
+  function renderLegacyOnlyList() {
+    legacyOnlyList.textContent = "";
+    if (legacyOnly.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No unpaired legacy baselines.";
+      legacyOnlyList.appendChild(empty);
+      return;
+    }
+
+    legacyOnly.forEach((path) => {
+      const item = document.createElement("div");
+      item.className = "list-item";
+      item.textContent = basename(path);
+      legacyOnlyList.appendChild(item);
+    });
+  }
+
+  async function renderPair(pair, index) {
+    const cardRef = createPairCard(pair, index);
+    pairsFeed.appendChild(cardRef.card);
+
+    try {
+      const [legacyImg, modernImg] = await Promise.all([
+        loadImage(pair.legacy),
+        loadImage(pair.modern)
+      ]);
+
+      const diff = computeDiff(legacyImg, modernImg);
+      cardRef.sizeValue.textContent = `${diff.width} x ${diff.height}`;
+      cardRef.diffValue.textContent = `${diff.normalizedDiff.toFixed(4)} (${formatPercent(diff.normalizedDiff)})`;
+      cardRef.changedValue.textContent =
+        `${formatPercent(diff.changedPixels / diff.totalPixels)} (${diff.changedPixels.toLocaleString()})`;
+
+      const ctx = cardRef.heatmapCanvas.getContext("2d");
+      cardRef.heatmapCanvas.width = diff.width;
+      cardRef.heatmapCanvas.height = diff.height;
+      ctx.putImageData(diff.heatmap, 0, 0);
+
+      if (diff.normalizedDiff <= THRESHOLD) {
+        cardRef.status.className = "badge ok";
+        cardRef.status.textContent = "Within threshold";
+      } else {
+        cardRef.status.className = "badge warn";
+        cardRef.status.textContent = "Over threshold";
+      }
+
+      return {
+        loaded: true,
+        withinThreshold: diff.normalizedDiff <= THRESHOLD
+      };
+    } catch (error) {
+      cardRef.status.className = "badge warn";
+      cardRef.status.textContent = "Load error";
+      cardRef.note.textContent = `${pair.note || ""} ${(error || "").toString()}`.trim();
+      cardRef.note.classList.add("error");
+      return {
+        loaded: false,
+        withinThreshold: false
+      };
+    }
+  }
+
+  async function renderDashboard() {
+    pairCount.textContent = String(pairs.length);
+    pairsFeed.textContent = "";
+    renderLegacyOnlyList();
+
+    const results = await Promise.all(pairs.map((pair, index) => renderPair(pair, index)));
+    const loaded = results.filter((it) => it.loaded).length;
+    const errors = results.length - loaded;
+    const within = results.filter((it) => it.loaded && it.withinThreshold).length;
+    const over = loaded - within;
+
+    withinCount.textContent = String(within);
+    overCount.textContent = String(over);
+    errorCount.textContent = String(errors);
+
+    if (errors > 0) {
+      summaryBadge.className = "badge warn";
+      summaryBadge.textContent = `${errors} pair(s) failed to load`;
+      return;
+    }
+
+    if (over > 0) {
+      summaryBadge.className = "badge warn";
+      summaryBadge.textContent = `${over} pair(s) over threshold`;
+      return;
+    }
+
+    summaryBadge.className = "badge ok";
+    summaryBadge.textContent = "All pairs within threshold";
+  }
+
+  renderDashboard();
+</script>
+</body>
+</html>

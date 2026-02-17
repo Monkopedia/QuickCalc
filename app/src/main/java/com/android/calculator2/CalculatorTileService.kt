@@ -16,12 +16,15 @@
 
 package com.android.calculator2
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import androidx.annotation.RequiresApi
 
+@RequiresApi(Build.VERSION_CODES.N)
 class CalculatorTileService : TileService() {
 
     override fun onStartListening() {
@@ -54,6 +57,7 @@ class CalculatorTileService : TileService() {
             )
             startActivityAndCollapse(pendingIntent)
         } else {
+            @SuppressLint("StartActivityAndCollapseDeprecated")
             @Suppress("DEPRECATION")
             startActivityAndCollapse(launchIntent)
         }

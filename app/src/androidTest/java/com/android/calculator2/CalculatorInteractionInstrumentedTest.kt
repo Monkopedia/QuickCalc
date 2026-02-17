@@ -29,6 +29,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import org.hamcrest.Matchers.containsString
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -124,6 +125,28 @@ class CalculatorInteractionInstrumentedTest {
                 } finally {
                     node.recycle()
                 }
+            }
+        }
+    }
+
+    @Test
+    fun operatorButtonsExposeExpectedTalkbackLabels() {
+        scenarioRule.scenario.onActivity { activity ->
+            val expectedLabels = listOf(
+                R.id.op_div to R.string.desc_op_div,
+                R.id.op_mul to R.string.desc_op_mul,
+                R.id.op_sub to R.string.desc_op_sub,
+                R.id.op_add to R.string.desc_op_add,
+                R.id.eq to R.string.desc_eq,
+                R.id.del to R.string.desc_del
+            )
+
+            expectedLabels.forEach { (viewId, labelId) ->
+                val button = activity.findViewById<android.view.View>(viewId)
+                assertEquals(
+                    activity.getString(labelId),
+                    button.contentDescription?.toString()
+                )
             }
         }
     }

@@ -29,6 +29,8 @@
   - `./gradlew :app:detektCheck --no-daemon`
 - License/header validation:
   - `./gradlew checkLicenseHeaders --no-daemon`
+- Toolchain minimums (Kotlin/Compose guard):
+  - `./gradlew verifyMinimumDependencyVersions --no-daemon`
 
 ## Screenshot Tests
 
