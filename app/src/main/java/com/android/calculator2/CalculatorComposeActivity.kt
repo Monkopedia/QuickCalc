@@ -31,10 +31,12 @@ class CalculatorComposeActivity : ComponentActivity() {
             EXTRA_EVALUATE_INITIAL_EXPRESSION,
             false
         )
+        val initialPadPage = intent.getIntExtra(EXTRA_INITIAL_PAD_PAGE, 0)
         setContent {
             CalculatorComposeRoute(
                 initialFormula = initialFormula,
-                evaluateInitialExpression = evaluateInitialExpression
+                evaluateInitialExpression = evaluateInitialExpression,
+                initialPadPage = initialPadPage
             )
         }
     }
@@ -42,16 +44,19 @@ class CalculatorComposeActivity : ComponentActivity() {
     companion object {
         private const val EXTRA_INITIAL_FORMULA = "extra_initial_formula"
         private const val EXTRA_EVALUATE_INITIAL_EXPRESSION = "extra_evaluate_initial_expression"
+        private const val EXTRA_INITIAL_PAD_PAGE = "extra_initial_pad_page"
 
         @Suppress("ktlint:standard:function-expression-body")
         fun newIntent(
             context: Context,
             initialFormula: String = "",
-            evaluateInitialExpression: Boolean = false
+            evaluateInitialExpression: Boolean = false,
+            initialPadPage: Int = 0
         ): Intent {
             return Intent(context, CalculatorComposeActivity::class.java).apply {
                 putExtra(EXTRA_INITIAL_FORMULA, initialFormula)
                 putExtra(EXTRA_EVALUATE_INITIAL_EXPRESSION, evaluateInitialExpression)
+                putExtra(EXTRA_INITIAL_PAD_PAGE, initialPadPage)
             }
         }
     }

@@ -24,6 +24,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
@@ -57,6 +58,29 @@ class CalculatorComposeInstrumentedTest {
     fun additionFlowRendersExpectedResult() {
         tap(TEST_TAG_DIGIT_1, TEST_TAG_ADD, TEST_TAG_DIGIT_2, TEST_TAG_EQUALS)
         composeRule.onNodeWithTag(TEST_TAG_RESULT).assertTextContains("3")
+    }
+
+    @Test
+    fun equalsTransitionSettlesWithoutDuplicateDisplayRows() {
+        tap(TEST_TAG_DIGIT_1, TEST_TAG_ADD, TEST_TAG_DIGIT_2)
+        composeRule.onNodeWithTag(TEST_TAG_RESULT).assertTextContains("3")
+
+        composeRule.mainClock.autoAdvance = false
+        try {
+            composeRule.onNodeWithTag(TEST_TAG_EQUALS).performClick()
+            composeRule.mainClock.advanceTimeByFrame()
+
+            composeRule.mainClock.advanceTimeBy(700L)
+            composeRule.waitForIdle()
+
+            composeRule.onAllNodesWithTag(TEST_TAG_FORMULA).assertCountEquals(0)
+            composeRule.onAllNodesWithTag(TEST_TAG_RESULT).assertCountEquals(1)
+            composeRule.onNodeWithTag(TEST_TAG_RESULT).assertTextContains("3")
+            composeRule.onNodeWithTag(TEST_TAG_RESULT).assertIsDisplayed()
+            composeRule.onAllNodesWithText("1+2").assertCountEquals(0)
+        } finally {
+            composeRule.mainClock.autoAdvance = true
+        }
     }
 
     @Test

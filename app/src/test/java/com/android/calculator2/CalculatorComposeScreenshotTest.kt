@@ -77,6 +77,15 @@ class CalculatorComposeScreenshotTest {
 
     @Test
     @Config(qualifiers = PHONE_PORTRAIT_LIGHT_QUALIFIERS)
+    fun phonePortraitLightDrawerOpenInitial() {
+        captureCalculatorCompose(
+            screenshotName = "phone_portrait_light_drawer_open_initial",
+            initialPadPage = 1
+        )
+    }
+
+    @Test
+    @Config(qualifiers = PHONE_PORTRAIT_LIGHT_QUALIFIERS)
     fun phonePortraitLightAdditionResult() {
         captureCalculatorCompose(
             screenshotName = "phone_portrait_light_addition",
@@ -138,13 +147,15 @@ class CalculatorComposeScreenshotTest {
     private fun captureCalculatorCompose(
         screenshotName: String,
         initialFormula: String = "",
-        evaluateInitialExpression: Boolean = false
+        evaluateInitialExpression: Boolean = false,
+        initialPadPage: Int = 0
     ) {
         val scenario = ActivityScenario.launch<CalculatorComposeActivity>(
             CalculatorComposeActivity.newIntent(
                 context = context,
                 initialFormula = initialFormula,
-                evaluateInitialExpression = evaluateInitialExpression
+                evaluateInitialExpression = evaluateInitialExpression,
+                initialPadPage = initialPadPage
             )
         )
         try {

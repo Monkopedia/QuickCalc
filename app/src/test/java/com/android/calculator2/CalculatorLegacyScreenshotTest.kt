@@ -73,6 +73,14 @@ class CalculatorLegacyScreenshotTest {
     }
 
     @Test
+    @Config(qualifiers = PHONE_PORTRAIT_LIGHT_QUALIFIERS)
+    fun phonePortraitLightDrawerOpen() {
+        captureCalculator("phone_portrait_light_drawer_open") { activity ->
+            activity.findViewById<CalculatorPadViewPager>(R.id.pad_pager)?.setCurrentItem(1, false)
+        }
+    }
+
+    @Test
     @Config(qualifiers = PHONE_LANDSCAPE_LIGHT_QUALIFIERS)
     fun phoneLandscapeLight() {
         captureCalculator("phone_landscape_light")
@@ -122,9 +130,13 @@ class CalculatorLegacyScreenshotTest {
         }
     }
 
-    private fun captureCalculator(snapshotName: String) {
+    private fun captureCalculator(
+        snapshotName: String,
+        beforeCapture: (Calculator) -> Unit = {}
+    ) {
         val scenario = ActivityScenario.launch(Calculator::class.java)
         try {
+            scenario.onActivity(beforeCapture)
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             onView(isRoot()).captureRoboImage(filePath = "$snapshotName.png")
         } finally {

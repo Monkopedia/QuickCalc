@@ -39,6 +39,10 @@ class CalculatorComposeParityReferenceTest {
                 legacyPath = "src/test/screenshots/legacy/phone_portrait_light.png"
             ),
             ScreenshotPair(
+                composePath = "src/test/screenshots/compose/phone_portrait_light_drawer_open_initial.png",
+                legacyPath = "src/test/screenshots/legacy/phone_portrait_light_drawer_open.png"
+            ),
+            ScreenshotPair(
                 composePath = "src/test/screenshots/compose/phone_portrait_dark_initial.png",
                 legacyPath = "src/test/screenshots/legacy/phone_portrait_dark.png"
             ),
