@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "com.android.calculator2"
+    namespace = "com.monkopedia.quickcalc"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.android.calculator2"
+        applicationId = "com.monkopedia.quickcalc"
         minSdk = 23
         targetSdk = 36
         versionCode = 1
@@ -144,9 +144,9 @@ tasks.register<JavaExec>("detektCheck") {
         "--max-issues",
         "999",
         "--input",
-        "src/main/java/com/android/calculator2/CalculatorExpressionBuilder.kt," +
-            "src/main/java/com/android/calculator2/CalculatorExpressionEvaluator.kt," +
-            "src/main/java/com/android/calculator2/CalculatorExpressionTokenizer.kt",
+        "src/main/java/com/monkopedia/quickcalc/CalculatorExpressionBuilder.kt," +
+            "src/main/java/com/monkopedia/quickcalc/CalculatorExpressionEvaluator.kt," +
+            "src/main/java/com/monkopedia/quickcalc/CalculatorExpressionTokenizer.kt",
         "--base-path",
         projectDir.absolutePath
     )
@@ -178,9 +178,9 @@ tasks.withType<Test>().configureEach {
 }
 
 val nonUiCoverageClassPatterns = listOf(
-    "com/android/calculator2/CalculatorExpressionBuilder.class",
-    "com/android/calculator2/CalculatorExpressionEvaluator.class",
-    "com/android/calculator2/CalculatorExpressionTokenizer.class"
+    "com/monkopedia/quickcalc/CalculatorExpressionBuilder.class",
+    "com/monkopedia/quickcalc/CalculatorExpressionEvaluator.class",
+    "com/monkopedia/quickcalc/CalculatorExpressionTokenizer.class"
 )
 
 val nonUiClassDirectories = layout.buildDirectory
