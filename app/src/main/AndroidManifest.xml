@@ -20,6 +20,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
         android:icon="@mipmap/ic_launcher_calculator"
@@ -40,18 +41,23 @@
 
         <activity
             android:name=".QuickSettingsSettingsActivity"
+            android:label="@string/quick_calc_launcher_name"
             android:exported="true"
             android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <service
             android:name=".CalculatorTileService"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_calculator"
+            android:icon="@drawable/fly_calc"
             android:label="@string/quick_settings_tile_label"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             tools:targetApi="24">
@@ -63,7 +69,7 @@
         <service
             android:name=".CalculatorTilePriorityService"
             android:exported="false"
-            android:foregroundServiceType="shortService" />
+            android:foregroundServiceType="dataSync" />
 
     </application>
 

@@ -20,6 +20,8 @@ package com.monkopedia.quickcalc
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +33,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -51,6 +54,9 @@ internal fun PhonePortraitPagerPad(
     state: CalculatorUiState,
     onEvent: (CalculatorUiEvent) -> Unit,
     initialPadPage: Int,
+    padPageOverride: Int?,
+    onPadPageOverrideConsumed: (() -> Unit)?,
+    onDrawerOpenChanged: ((Boolean) -> Unit)?,
     style: LayoutStyleSpec,
     numericPadBackground: Color,
     operatorPadBackground: Color,
@@ -76,95 +82,129 @@ internal fun PhonePortraitPagerPad(
             pagerState.animateScrollToPage(0)
         }
     }
+    LaunchedEffect(padPageOverride) {
+        val page = padPageOverride ?: return@LaunchedEffect
+        val clampedPage = page.coerceIn(0, PAD_PAGE_COUNT - 1)
+        if (clampedPage != pagerState.currentPage) {
+            pagerState.animateScrollToPage(clampedPage)
+        }
+        onPadPageOverrideConsumed?.invoke()
+    }
+    LaunchedEffect(pagerState.currentPage, pagerState.targetPage) {
+        onDrawerOpenChanged?.invoke(pagerState.currentPage > 0 || pagerState.targetPage > 0)
+    }
 
-    HorizontalPager(
-        state = pagerState,
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(pagerBackdropColor)
-            .testTag(TEST_TAG_PAD_PAGER),
-        pageSpacing = padPageMargin,
-        beyondViewportPageCount = 1
-    ) { page ->
-        val pagePosition = page - pagerState.currentPage - pagerState.currentPageOffsetFraction
-        Box(
+    ) {
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer {
-                    if (pagePosition < 0f) {
-                        translationX = (size.width + pageSpacingPx) * -pagePosition
-                        val baseAlpha = (1f + pagePosition).coerceAtLeast(0f)
-                        alpha =
-                            if (page == 0) {
-                                baseAlpha.coerceAtLeast(pinnedPageMinAlpha)
-                            } else {
-                                baseAlpha
+                .testTag(TEST_TAG_PAD_PAGER),
+            pageSpacing = padPageMargin,
+            beyondViewportPageCount = 1
+        ) { page ->
+            val pagePosition = page - pagerState.currentPage - pagerState.currentPageOffsetFraction
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        if (pagePosition < 0f) {
+                            translationX = (size.width + pageSpacingPx) * -pagePosition
+                            val baseAlpha = (1f + pagePosition).coerceAtLeast(0f)
+                            alpha =
+                                if (page == 0) {
+                                    baseAlpha.coerceAtLeast(pinnedPageMinAlpha)
+                                } else {
+                                    baseAlpha
+                                }
+                        } else {
+                            translationX = 0f
+                            alpha = 1f
+                        }
+                    }
+            ) {
+                when (page) {
+                    0 -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Row(modifier = Modifier.fillMaxSize()) {
+                                NumericPad(
+                                    onEvent = onEvent,
+                                    enabled = isSettledOnPage(pagerState, 0),
+                                    gridStyle = style.numericGrid,
+                                    textSize = style.numericTextSize,
+                                    showEquals = true,
+                                    modifier = Modifier
+                                        .weight(style.numericWeight)
+                                        .fillMaxSize()
+                                        .background(numericPadBackground)
+                                        .clipToBounds()
+                                )
+                                OperatorPadOneColumn(
+                                    state = state,
+                                    onEvent = onEvent,
+                                    enabled = isSettledOnPage(pagerState, 0),
+                                    gridStyle = style.operatorOneGrid,
+                                    operatorTextSize = style.operatorTextSize,
+                                    topLabelTextSize = style.operatorTopLabelTextSize,
+                                    modifier = Modifier
+                                        .weight(style.operatorWeight)
+                                        .fillMaxSize()
+                                        .background(operatorPadBackground)
+                                        .clipToBounds()
+                                )
                             }
-                    } else {
-                        translationX = 0f
-                        alpha = 1f
-                    }
-                }
-        ) {
-            when (page) {
-                0 -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        Row(modifier = Modifier.fillMaxSize()) {
-                            NumericPad(
-                                onEvent = onEvent,
-                                enabled = isSettledOnPage(pagerState, 0),
-                                gridStyle = style.numericGrid,
-                                textSize = style.numericTextSize,
-                                showEquals = true,
-                                modifier = Modifier
-                                    .weight(style.numericWeight)
-                                    .fillMaxSize()
-                                    .background(numericPadBackground)
-                                    .clipToBounds()
-                            )
-                            OperatorPadOneColumn(
-                                state = state,
-                                onEvent = onEvent,
-                                enabled = isSettledOnPage(pagerState, 0),
-                                gridStyle = style.operatorOneGrid,
-                                operatorTextSize = style.operatorTextSize,
-                                topLabelTextSize = style.operatorTopLabelTextSize,
-                                modifier = Modifier
-                                    .weight(style.operatorWeight)
-                                    .fillMaxSize()
-                                    .background(operatorPadBackground)
-                                    .clipToBounds()
-                            )
-                        }
-                        if (advancedPeekWidth > 0.dp) {
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .fillMaxHeight()
-                                    .width(advancedPeekWidth)
-                                    .background(advancedPadBackground)
-                            )
+                            if (advancedPeekWidth > 0.dp) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .fillMaxHeight()
+                                        .width(advancedPeekWidth)
+                                        .background(advancedPadBackground)
+                                )
+                            }
                         }
                     }
-                }
 
-                1 -> {
-                    AdvancedPad(
-                        onEvent = onEvent,
-                        enabled = isSettledOnPage(pagerState, 1),
-                        gridStyle = style.advancedGrid,
-                        textSize = style.advancedTextSize,
-                        columns = style.advancedColumns,
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .fillMaxHeight()
-                            .fillMaxWidth(ADVANCED_PAGE_WIDTH_FRACTION)
-                            .background(advancedPadBackground)
-                            .clipToBounds()
-                            .testTag(TEST_TAG_ADVANCED_PAD)
-                    )
+                    1 -> {
+                        AdvancedPad(
+                            onEvent = onEvent,
+                            enabled = isSettledOnPage(pagerState, 1),
+                            gridStyle = style.advancedGrid,
+                            textSize = style.advancedTextSize,
+                            columns = style.advancedColumns,
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .fillMaxHeight()
+                                .fillMaxWidth(ADVANCED_PAGE_WIDTH_FRACTION)
+                                .background(advancedPadBackground)
+                                .clipToBounds()
+                                .testTag(TEST_TAG_ADVANCED_PAD)
+                        )
+                    }
                 }
             }
+        }
+
+        if (pagerState.currentPage > 0 || pagerState.targetPage > 0) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .fillMaxHeight()
+                    .fillMaxWidth(1f - ADVANCED_PAGE_WIDTH_FRACTION)
+                    .testTag(TEST_TAG_DRAWER_SCRIM)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(0)
+                        }
+                    }
+            )
         }
     }
 }

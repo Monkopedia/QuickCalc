@@ -1,0 +1,73 @@
+<vector
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="48dp"
+        android:height="48dp"
+        android:tint="#000000"
+        android:viewportHeight="10"
+        android:viewportWidth="10"
+>
+      
+    <path android:fillColor="@android:color/black"
+          android:pathData="
+          M
+          M 4.0 2
+          l 2 0
+          c .66 0 1 .33 1 1
+          l 0 3.75
+          c 0 .66 -.33 1 -1 1
+          l -2 0
+          c -.66 0 -1 -.33 -1 -1
+          l 0 -3.75
+          c 0 -.66 .33 -1 1 -1
+          z
+          M 4.25 2.75 h -.5 v 1.25 h2.5 v-1.25z
+          M 4.75 4.5 h -1 v 1 h 1z
+          M 6.25 4.5 h -1 v 1 h 1z
+          M 4.75 6 h -1 v 1 h 1z
+          M 6.25 6 h -1 v 1 h 1z
+          "/>
+    <path android:strokeColor="@android:color/black"
+          android:strokeLineCap="round"
+          android:strokeLineJoin="round"
+          android:strokeWidth=".125"
+          android:pathData="
+                M 4 5 l .5 0
+                M 4.25 4.75 l 0 .5
+                M 5.5 5 l .5 0
+                M 4 6.5 l .5 0
+                M 4.25 6.25 l 0 .0
+                M 4.25 6.75 l 0 .0
+                M 5.5 6.25 l .5 .5
+                M 5.5 6.75 l .5 -.5
+                " />
+    <path android:fillColor="@android:color/black"
+          android:pathData="
+          M 7.25 6.5
+          v -2.5
+          c .5 -.75 1.25 -.05 2 0
+          c .25 0 .35 0 .5 -.125
+          c -.25 .5 -.75 .75 -1 .85
+          c .15 .05 .35 .05 .5 0
+          c -.25 .5 -.75 .75 -1.25 .85
+          c .15 .05 .25 .05 .35 0
+          c -.25 .5 -.75 .85 -1.1 .9
+          z
+            " />
+    <group android:pivotX="5" android:pivotY="5" android:scaleX="-1">
+        <path android:fillColor="@android:color/black"
+              android:pathData="
+          M 7.25 6.5
+          v -2.5
+          c .5 -.75 1.25 -.05 2 0
+          c .25 0 .35 0 .5 -.125
+          c -.25 .5 -.75 .75 -1 .85
+          c .15 .05 .35 .05 .5 0
+          c -.25 .5 -.75 .75 -1.25 .85
+          c .15 .05 .25 .05 .35 0
+          c -.25 .5 -.75 .85 -1.1 .9
+          z
+            " />
+
+    </group>
+    
+</vector>

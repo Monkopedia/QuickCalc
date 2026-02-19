@@ -22,6 +22,7 @@ internal const val ADVANCED_PEEK_WIDTH_MULTIPLIER = 1f
 
 const val TEST_TAG_PAD_PAGER = "pad_pager"
 const val TEST_TAG_ADVANCED_PAD = "pad_advanced"
+const val TEST_TAG_DRAWER_SCRIM = "drawer_scrim"
 
 const val TEST_TAG_DISPLAY = "display"
 const val TEST_TAG_FORMULA = "formula"

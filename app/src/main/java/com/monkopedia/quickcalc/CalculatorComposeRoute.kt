@@ -22,8 +22,9 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,10 +42,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -56,15 +55,23 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.unit.dp
-import kotlin.math.hypot
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun CalculatorComposeRoute(
     modifier: Modifier = Modifier,
     initialFormula: String = "",
     evaluateInitialExpression: Boolean = false,
-    initialPadPage: Int = 0
+    initialPadPage: Int = 0,
+    initialUiState: CalculatorUiState? = null,
+    colorPalette: CalculatorColorPalette? = null,
+    enableDisplayClipboardGestures: Boolean = false,
+    showDrawerShortcutButton: Boolean = false,
+    padPageOverride: Int? = null,
+    onPadPageOverrideConsumed: (() -> Unit)? = null,
+    onRequestPadPage: ((Int) -> Unit)? = null,
+    onCalculatorStateChange: ((CalculatorUiState) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val reducer = remember(context) {
@@ -73,10 +80,11 @@ fun CalculatorComposeRoute(
     var uiState by rememberSaveable(
         initialFormula,
         evaluateInitialExpression,
+        initialUiState,
         stateSaver = calculatorUiStateSaver()
     ) {
         mutableStateOf(
-            reducer.initialState(
+            initialUiState ?: reducer.initialState(
                 initialFormula = initialFormula,
                 evaluateAsResult = evaluateInitialExpression
             )
@@ -89,6 +97,13 @@ fun CalculatorComposeRoute(
             uiState = reducer.reduce(uiState, event)
         },
         initialPadPage = initialPadPage,
+        colorPalette = colorPalette,
+        enableDisplayClipboardGestures = enableDisplayClipboardGestures,
+        showDrawerShortcutButton = showDrawerShortcutButton,
+        padPageOverride = padPageOverride,
+        onPadPageOverrideConsumed = onPadPageOverrideConsumed,
+        onRequestPadPage = onRequestPadPage,
+        onCalculatorStateChange = onCalculatorStateChange,
         modifier = modifier
     )
 }
@@ -98,9 +113,34 @@ fun CalculatorScreen(
     state: CalculatorUiState,
     onEvent: (CalculatorUiEvent) -> Unit,
     initialPadPage: Int = 0,
+    colorPalette: CalculatorColorPalette? = null,
+    enableDisplayClipboardGestures: Boolean = false,
+    showDrawerShortcutButton: Boolean = false,
+    padPageOverride: Int? = null,
+    onPadPageOverrideConsumed: (() -> Unit)? = null,
+    onRequestPadPage: ((Int) -> Unit)? = null,
+    onCalculatorStateChange: ((CalculatorUiState) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    ApplyLegacyStatusBarColor(state)
+    val defaultAccentColor = colorResource(R.color.calculator_accent_color)
+    val defaultErrorColor = colorResource(R.color.calculator_error_color)
+    val defaultPalette = CalculatorColorPalette(
+        accentColor = defaultAccentColor,
+        errorColor = defaultErrorColor,
+        displayBackgroundColor = colorResource(R.color.display_background_color),
+        formulaColor = colorResource(R.color.display_formula_text_color),
+        resultColor = colorResource(R.color.display_result_text_color),
+        numericPadBackgroundColor = colorResource(R.color.pad_numeric_background_color),
+        operatorPadBackgroundColor = colorResource(R.color.pad_operator_background_color),
+        advancedPadBackgroundColor = colorResource(R.color.pad_advanced_background_color)
+    )
+    val palette = colorPalette ?: defaultPalette
+
+    ApplyLegacyStatusBarColor(
+        hasError = state.hasError,
+        accentColor = palette.accentColor,
+        errorColor = palette.errorColor
+    )
     val clipboardManager = LocalClipboardManager.current
     val focusRequester = remember { FocusRequester() }
 
@@ -109,30 +149,41 @@ fun CalculatorScreen(
         resolveLayoutSpec(configuration)
     }
 
-    val displayBackground = colorResource(R.color.display_background_color)
-    val numericPadBackground = colorResource(R.color.pad_numeric_background_color)
-    val operatorPadBackground = colorResource(R.color.pad_operator_background_color)
-    val advancedPadBackground = colorResource(R.color.pad_advanced_background_color)
-    val accentColor = colorResource(R.color.calculator_accent_color)
-    val errorColor = colorResource(R.color.calculator_error_color)
+    val displayBackground = palette.displayBackgroundColor
+    val numericPadBackground = palette.numericPadBackgroundColor
+    val operatorPadBackground = palette.operatorPadBackgroundColor
+    val advancedPadBackground = palette.advancedPadBackgroundColor
+    val accentColor = palette.accentColor
+    val errorColor = palette.errorColor
     val formulaColor =
         if (state.hasError) {
             errorColor
         } else {
-            colorResource(R.color.display_formula_text_color)
+            palette.formulaColor
         }
     val resultColor =
         if (state.hasError) {
             errorColor
         } else {
-            colorResource(R.color.display_result_text_color)
+            palette.resultColor
         }
 
     var previousState by remember { mutableStateOf(state) }
-    var displayBounds by remember { mutableStateOf<Rect?>(null) }
     var revealColor by remember { mutableStateOf<Color?>(null) }
+    var isDrawerOpen by remember { mutableStateOf(initialPadPage > 0) }
     val revealProgress = remember { Animatable(0f) }
     val revealAlpha = remember { Animatable(0f) }
+    var copyRevealTrigger by remember { mutableStateOf(0) }
+    val copyRevealProgress = remember { Animatable(0f) }
+    val copyRevealAlpha = remember { Animatable(0f) }
+    val copyIndicatorAlpha = remember { Animatable(0f) }
+    val copyRevealColor = remember(displayBackground) {
+        if (displayBackground.luminance() > 0.5f) {
+            Color(0xFFF9A825)
+        } else {
+            Color(0xFFFFD54F)
+        }
+    }
 
     LaunchedEffect(focusRequester) {
         focusRequester.requestFocus()
@@ -140,27 +191,55 @@ fun CalculatorScreen(
 
     LaunchedEffect(state) {
         val previous = previousState
-        val bounds = displayBounds
-        if (bounds != null) {
-            val isErrorTransition =
-                state.phase == CalculatorUiPhase.ERROR &&
-                    previous.phase != CalculatorUiPhase.ERROR
-            val isClearTransition =
-                state.formulaText.isEmpty() &&
-                    previous.formulaText.isNotEmpty() &&
-                    state.phase != CalculatorUiPhase.ERROR
+        val isErrorTransition =
+            state.phase == CalculatorUiPhase.ERROR &&
+                previous.phase != CalculatorUiPhase.ERROR
+        val isClearTransition =
+            state.formulaText.isEmpty() &&
+                previous.formulaText.isNotEmpty() &&
+                state.phase != CalculatorUiPhase.ERROR
 
-            if (isErrorTransition || isClearTransition) {
-                revealColor = if (isErrorTransition) errorColor else accentColor
-                revealProgress.snapTo(0f)
-                revealAlpha.snapTo(1f)
-                revealProgress.animateTo(1f, tween(durationMillis = 360))
-                revealAlpha.animateTo(0f, tween(durationMillis = 220))
-                revealColor = null
-            }
+        if (isErrorTransition || isClearTransition) {
+            revealColor = if (isErrorTransition) errorColor else accentColor
+            revealProgress.snapTo(0f)
+            revealAlpha.snapTo(1f)
+            revealProgress.animateTo(1f, tween(durationMillis = 360))
+            revealAlpha.animateTo(0f, tween(durationMillis = 220))
+            revealColor = null
         }
 
         previousState = state
+    }
+
+    LaunchedEffect(copyRevealTrigger) {
+        if (copyRevealTrigger == 0) {
+            return@LaunchedEffect
+        }
+        copyRevealProgress.snapTo(0f)
+        copyRevealAlpha.snapTo(1f)
+        copyIndicatorAlpha.snapTo(0f)
+        launch {
+            copyIndicatorAlpha.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 180, easing = LinearOutSlowInEasing)
+            )
+        }
+        // Keep copy ripple timing aligned with clear ripple behavior.
+        copyRevealProgress.animateTo(1f, tween(durationMillis = 360))
+        copyRevealAlpha.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(durationMillis = 220)
+        )
+        // Start icon fade earlier but make it longer, keeping the same final endpoint.
+        delay(300)
+        copyIndicatorAlpha.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(durationMillis = 460, easing = FastOutSlowInEasing)
+        )
+    }
+
+    LaunchedEffect(state) {
+        onCalculatorStateChange?.invoke(state)
     }
 
     Box(
@@ -185,9 +264,35 @@ fun CalculatorScreen(
                 formulaColor = formulaColor,
                 resultColor = resultColor,
                 animateFormulaAutosize = state.phase == CalculatorUiPhase.INPUT,
-                onBoundsChanged = { bounds ->
-                    displayBounds = bounds
-                }
+                showDrawerShortcutButton = showDrawerShortcutButton &&
+                    layoutSpec.mode == ComposeLayoutMode.PHONE_PORTRAIT_PAGER,
+                isDrawerOpen = isDrawerOpen,
+                onDrawerShortcutClick = {
+                    onRequestPadPage?.invoke(if (isDrawerOpen) 0 else 1)
+                },
+                onDisplayClick = if (enableDisplayClipboardGestures) {
+                    {
+                        copyExpressionToClipboard(state, clipboardManager)
+                        copyRevealTrigger += 1
+                    }
+                } else {
+                    null
+                },
+                onDisplayLongClick = if (enableDisplayClipboardGestures) {
+                    {
+                        pasteClipboardExpression(clipboardManager, onEvent)
+                    }
+                } else {
+                    null
+                },
+                showCopiedIndicator = copyIndicatorAlpha.value > 0.01f,
+                clearRevealColor = revealColor,
+                clearRevealProgress = revealProgress.value,
+                clearRevealAlpha = revealAlpha.value,
+                copyRevealColor = copyRevealColor,
+                copyRevealProgress = copyRevealProgress.value,
+                copyRevealAlpha = copyRevealAlpha.value,
+                copyIndicatorAlpha = copyIndicatorAlpha.value
             )
 
             when (layoutSpec.mode) {
@@ -196,6 +301,9 @@ fun CalculatorScreen(
                         state = state,
                         onEvent = onEvent,
                         initialPadPage = initialPadPage,
+                        padPageOverride = padPageOverride,
+                        onPadPageOverrideConsumed = onPadPageOverrideConsumed,
+                        onDrawerOpenChanged = { isOpen -> isDrawerOpen = isOpen },
                         style = layoutSpec,
                         numericPadBackground = numericPadBackground,
                         operatorPadBackground = operatorPadBackground,
@@ -226,55 +334,8 @@ fun CalculatorScreen(
                 }
             }
         }
-
-        val bounds = displayBounds
-        val activeRevealColor = revealColor
-        if (bounds != null && activeRevealColor != null && revealAlpha.value > 0f) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val revealCenter = Offset(
-                    x = bounds.right - 24.dp.toPx(),
-                    y = bounds.bottom + 24.dp.toPx()
-                )
-                val maxRadius = maxDistanceToBounds(
-                    source = revealCenter,
-                    left = bounds.left,
-                    top = 0f,
-                    right = bounds.right,
-                    bottom = bounds.bottom
-                )
-                clipRect(
-                    left = bounds.left,
-                    top = 0f,
-                    right = bounds.right,
-                    bottom = bounds.bottom
-                ) {
-                    drawCircle(
-                        color = activeRevealColor.copy(alpha = revealAlpha.value),
-                        radius = maxRadius * revealProgress.value,
-                        center = revealCenter
-                    )
-                }
-            }
-        }
     }
 }
-
-private fun maxDistanceToBounds(
-    source: Offset,
-    left: Float,
-    top: Float,
-    right: Float,
-    bottom: Float
-): Float {
-    val topLeft = distance(source, Offset(left, top))
-    val topRight = distance(source, Offset(right, top))
-    val bottomLeft = distance(source, Offset(left, bottom))
-    val bottomRight = distance(source, Offset(right, bottom))
-    return maxOf(topLeft, topRight, bottomLeft, bottomRight)
-}
-
-private fun distance(first: Offset, second: Offset): Float =
-    hypot(first.x - second.x, first.y - second.y)
 
 private fun handleHardwareKeyEvent(
     event: KeyEvent,
@@ -368,16 +429,10 @@ private fun Char.normalizedCalculatorToken(): String = when (this) {
 }
 
 @Composable
-private fun ApplyLegacyStatusBarColor(state: CalculatorUiState) {
+private fun ApplyLegacyStatusBarColor(hasError: Boolean, accentColor: Color, errorColor: Color) {
     val context = LocalContext.current
     val activity = context.findActivity() ?: return
-    val statusBarColor = colorResource(
-        if (state.hasError) {
-            R.color.calculator_error_color
-        } else {
-            R.color.calculator_accent_color
-        }
-    )
+    val statusBarColor = if (hasError) errorColor else accentColor
     SideEffect {
         @Suppress("DEPRECATION")
         activity.window.statusBarColor = statusBarColor.toArgb()

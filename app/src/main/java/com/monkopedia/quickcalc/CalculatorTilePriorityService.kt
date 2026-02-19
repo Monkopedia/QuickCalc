@@ -26,20 +26,27 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
 
 class CalculatorTilePriorityService : Service() {
 
+    override fun onCreate() {
+        super.onCreate()
+        trace("onCreate")
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        trace("onStartCommand")
         val notification = buildNotification()
         runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 startForeground(
                     NOTIFICATION_ID,
                     notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
                 )
             } else {
                 startForeground(NOTIFICATION_ID, notification)
@@ -52,10 +59,15 @@ class CalculatorTilePriorityService : Service() {
     }
 
     override fun onTimeout(startId: Int) {
+        trace("onTimeout")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            CalculatorTileService.dismissActiveDialogFromTimeout()
+        }
         stopSelf(startId)
     }
 
     override fun onDestroy() {
+        trace("onDestroy")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } else {
@@ -125,6 +137,7 @@ class CalculatorTilePriorityService : Service() {
         private const val NOTIFICATION_ID = 1101
 
         fun start(context: Context) {
+            traceStatic("start_called")
             val intent = Intent(context, CalculatorTilePriorityService::class.java)
             runCatching {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -134,11 +147,21 @@ class CalculatorTilePriorityService : Service() {
                 }
             }.onFailure { throwable ->
                 Log.w(TAG, "Unable to request foreground priority service", throwable)
+                traceStatic("start_failed")
             }
         }
 
         fun stop(context: Context) {
+            traceStatic("stop_called")
             context.stopService(Intent(context, CalculatorTilePriorityService::class.java))
         }
+
+        private fun traceStatic(event: String) {
+            Log.i(TAG, "TRACE event=$event t=${SystemClock.elapsedRealtimeNanos()}")
+        }
+    }
+
+    private fun trace(event: String) {
+        Log.i(TAG, "TRACE event=$event t=${SystemClock.elapsedRealtimeNanos()}")
     }
 }

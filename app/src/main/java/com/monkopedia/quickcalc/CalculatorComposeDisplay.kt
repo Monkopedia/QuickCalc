@@ -23,15 +23,21 @@ import android.graphics.Rect as AndroidRect
 import android.graphics.Typeface
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,15 +49,16 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -62,7 +69,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.hypot
 
 private val LEGACY_ACCELERATE_DECELERATE_EASING = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
 private const val RESULT_ANIMATION_FALLBACK_DURATION_MS = 420
@@ -75,7 +84,19 @@ internal fun DisplayPanel(
     formulaColor: Color,
     resultColor: Color,
     animateFormulaAutosize: Boolean,
-    onBoundsChanged: (Rect) -> Unit
+    showDrawerShortcutButton: Boolean,
+    isDrawerOpen: Boolean,
+    onDrawerShortcutClick: (() -> Unit)?,
+    onDisplayClick: (() -> Unit)?,
+    onDisplayLongClick: (() -> Unit)?,
+    showCopiedIndicator: Boolean,
+    clearRevealColor: Color?,
+    clearRevealProgress: Float,
+    clearRevealAlpha: Float,
+    copyRevealColor: Color,
+    copyRevealProgress: Float,
+    copyRevealAlpha: Float,
+    copyIndicatorAlpha: Float
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -146,13 +167,21 @@ internal fun DisplayPanel(
         previousUiState = state
     }
 
+    val displayGestureModifier =
+        if (onDisplayClick == null && onDisplayLongClick == null) {
+            Modifier
+        } else {
+            Modifier.combinedClickable(
+                onClick = { onDisplayClick?.invoke() },
+                onLongClick = onDisplayLongClick
+            )
+        }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            .onGloballyPositioned { coordinates ->
-                onBoundsChanged(coordinates.boundsInRoot())
-            }
+            .then(displayGestureModifier)
             .testTag(TEST_TAG_DISPLAY),
         horizontalAlignment = Alignment.End
     ) {
@@ -199,9 +228,116 @@ internal fun DisplayPanel(
                     resultRowHeightDp = resultRowHeightDp
                 )
             }
+            if (clearRevealColor != null && clearRevealAlpha > 0f) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val revealCenter = Offset(
+                        x = size.width - 24.dp.toPx(),
+                        y = size.height + 24.dp.toPx()
+                    )
+                    val maxRadius = localMaxDistanceToRect(revealCenter, size.width, size.height)
+                    clipRect(
+                        left = 0f,
+                        top = 0f,
+                        right = size.width,
+                        bottom = size.height
+                    ) {
+                        drawCircle(
+                            color = clearRevealColor.copy(alpha = clearRevealAlpha),
+                            radius = maxRadius * clearRevealProgress,
+                            center = revealCenter
+                        )
+                    }
+                }
+            }
+            if (copyRevealAlpha > 0f) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val revealCenter = Offset(
+                        x = 24.dp.toPx(),
+                        y = 24.dp.toPx()
+                    )
+                    val maxRadius = localMaxDistanceToRect(revealCenter, size.width, size.height)
+                    clipRect(
+                        left = 0f,
+                        top = 0f,
+                        right = size.width,
+                        bottom = size.height
+                    ) {
+                        drawCircle(
+                            color = copyRevealColor.copy(alpha = copyRevealAlpha),
+                            radius = maxRadius * copyRevealProgress,
+                            center = revealCenter
+                        )
+                    }
+                }
+            }
+            if (showCopiedIndicator) {
+                val revealAlpha = copyRevealAlpha.coerceIn(0f, 1f)
+                val rawTintFraction =
+                    ((1f - revealAlpha) * copyRevealProgress.coerceIn(0f, 1f))
+                        .coerceIn(0f, 1f)
+                val tintFraction =
+                    rawTintFraction * rawTintFraction * (3f - (2f * rawTintFraction))
+                val copyIndicatorColor =
+                    lerp(
+                        start = Color.Black,
+                        stop = copyRevealColor,
+                        fraction = tintFraction
+                    )
+                Icon(
+                    painter = painterResource(R.drawable.ic_copy_24),
+                    contentDescription = null,
+                    tint = copyIndicatorColor,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 12.dp, top = 8.dp)
+                        .size(22.dp)
+                        .graphicsLayer { alpha = copyIndicatorAlpha.coerceIn(0f, 1f) }
+                )
+            }
+            if (showDrawerShortcutButton && onDrawerShortcutClick != null) {
+                val drawerChevronRotation by animateFloatAsState(
+                    targetValue = if (isDrawerOpen) 180f else 0f,
+                    animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                    label = "drawer_chevron_rotation"
+                )
+                val drawerChevronTint =
+                    if (backgroundColor.luminance() > 0.5f) {
+                        Color.Black
+                    } else {
+                        Color.White
+                    }
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 4.dp, bottom = 2.dp)
+                        .size(52.dp)
+                        .combinedClickable(onClick = onDrawerShortcutClick),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_arrow_back_24),
+                        contentDescription = null,
+                        tint = drawerChevronTint,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .graphicsLayer { rotationZ = drawerChevronRotation }
+                    )
+                }
+            }
         }
     }
 }
+
+private fun localMaxDistanceToRect(source: Offset, width: Float, height: Float): Float {
+    val topLeft = localDistance(source, Offset(0f, 0f))
+    val topRight = localDistance(source, Offset(width, 0f))
+    val bottomLeft = localDistance(source, Offset(0f, height))
+    val bottomRight = localDistance(source, Offset(width, height))
+    return maxOf(topLeft, topRight, bottomLeft, bottomRight)
+}
+
+private fun localDistance(first: Offset, second: Offset): Float =
+    hypot(first.x - second.x, first.y - second.y)
 
 @Composable
 private fun DisplayStaticRows(

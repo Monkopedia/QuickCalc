@@ -27,6 +27,10 @@
     <string name="quick_settings_settings_description" translatable="false">Use this screen to add the Calculator tile to Quick Settings.</string>
     <!-- Action for requesting tile addition to Quick Settings. -->
     <string name="quick_settings_add_tile_action" translatable="false">Add Tile to Quick Settings</string>
+    <!-- Temporary debug action to open a standard app dialog with the same blur settings. -->
+    <string name="quick_settings_open_debug_dialog" translatable="false">Open Standard Debug Dialog</string>
+    <!-- Title shown inside the standard app debug dialog. -->
+    <string name="quick_settings_debug_dialog_title" translatable="false">Standard App Dialog Debug</string>
     <!-- Result shown when adding tiles is unsupported on this Android version. -->
     <string name="quick_settings_add_tile_requires_tiramisu" translatable="false">Adding tiles from the app requires Android 13 or newer.</string>
     <!-- Result shown when StatusBarManager is unavailable. -->
@@ -43,6 +47,28 @@
     <string name="quick_settings_add_tile_result_not_foreground" translatable="false">Bring the app to the foreground and try again.</string>
     <!-- Result shown when tile component is not accepted by system. -->
     <string name="quick_settings_add_tile_result_bad_component" translatable="false">Tile component is not available.</string>
+    <!-- Label used for launcher entry. -->
+    <string name="quick_calc_launcher_name" translatable="false">Quick Calc</string>
+    <!-- Settings section heading for theme controls. -->
+    <string name="settings_section_theme" translatable="false">Theme</string>
+    <!-- Settings section heading for accent controls. -->
+    <string name="settings_section_accent_color" translatable="false">Accent color</string>
+    <!-- Settings section heading for dialog background controls. -->
+    <string name="settings_section_dialog_background" translatable="false">Dialog background</string>
+    <!-- Settings section heading for size mode controls. -->
+    <string name="settings_section_size_mode" translatable="false">Dialog size</string>
+    <!-- Label shown before static mode alignment selector. -->
+    <string name="settings_static_alignment" translatable="false">Static alignment</string>
+    <!-- Label shown for static mode size slider. -->
+    <string name="settings_static_size_percent" translatable="false">Static size: %1$d%%</string>
+    <!-- Hint text shown when dynamic mode is selected. -->
+    <string name="settings_dynamic_hint" translatable="false">Dynamic mode supports drag and pinch in the dialog.</string>
+    <!-- Setting toggle for persisting calculator contents between sessions. -->
+    <string name="settings_remember_last_values" translatable="false">Remember last values on close</string>
+    <!-- Setting toggle for automatically closing dialog after inactivity. -->
+    <string name="settings_auto_close_on_inactivity" translatable="false">Auto-close dialog on inactivity</string>
+    <!-- Setting label for inactivity timeout slider in seconds. -->
+    <string name="settings_auto_close_timeout_seconds" translatable="false">Timeout: %1$d seconds</string>
     <!-- Foreground service notification channel label for quick settings calculator boost. -->
     <string name="quick_settings_priority_notification_channel_name" translatable="false">Quick Settings Calculator</string>
     <!-- Foreground service notification title while calculator is shown from quick settings. -->
