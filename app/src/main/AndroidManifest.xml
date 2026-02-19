@@ -19,6 +19,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application
         android:icon="@mipmap/ic_launcher_calculator"
         android:label="@string/app_name"
@@ -27,14 +29,22 @@
         <activity
             android:name=".CalculatorComposeActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:launchMode="singleTask"
             android:taskAffinity="${applicationId}.compose"
             android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.APP_CALCULATOR" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".QuickSettingsSettingsActivity"
+            android:exported="true"
+            android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
@@ -49,6 +59,11 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
+
+        <service
+            android:name=".CalculatorTilePriorityService"
+            android:exported="false"
+            android:foregroundServiceType="shortService" />
 
     </application>
 

@@ -14,18 +14,38 @@
  * limitations under the License.
  */
 
+@file:Suppress("ktlint:standard:function-naming")
+
 package com.monkopedia.quickcalc
 
-import android.annotation.SuppressLint
-import android.app.PendingIntent
-import android.content.Intent
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import android.util.Log
+import android.view.ViewGroup
+import androidx.activity.ComponentDialog
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
 
 @RequiresApi(Build.VERSION_CODES.N)
 class CalculatorTileService : TileService() {
+
+    companion object {
+        private const val TAG = "CalculatorTileService"
+    }
+
+    private var activeDialog: ComponentDialog? = null
 
     override fun onStartListening() {
         super.onStartListening()
@@ -38,33 +58,58 @@ class CalculatorTileService : TileService() {
 
     override fun onClick() {
         super.onClick()
-        launchCalculator()
+        if (activeDialog?.isShowing == true) {
+            return
+        }
+        CalculatorTilePriorityService.start(this)
+        runCatching {
+            showCalculatorDialog()
+        }.onFailure { throwable ->
+            Log.w(TAG, "Unable to show Quick Settings calculator dialog", throwable)
+            CalculatorTilePriorityService.stop(this)
+        }
     }
 
-    private fun launchCalculator() {
-        val launchIntent = Intent(this, CalculatorComposeActivity::class.java).apply {
-            action = ACTION_LAUNCH_FROM_TILE
-            putExtra(EXTRA_LAUNCHED_FROM_TILE, true)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    private fun showCalculatorDialog() {
+        val composeView = ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            setContent {
+                QuickSettingsCalculatorDialogContent()
+            }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            val pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                launchIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        val dialog = ComponentDialog(this, R.style.CalculatorTileDialogTheme).apply {
+            setContentView(
+                composeView,
+                ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
             )
-            startActivityAndCollapse(pendingIntent)
-        } else {
-            @SuppressLint("StartActivityAndCollapseDeprecated")
-            @Suppress("DEPRECATION")
-            startActivityAndCollapse(launchIntent)
+            window?.decorView?.setPadding(0, 0, 0, 0)
+            setOnDismissListener {
+                if (activeDialog === this) {
+                    activeDialog = null
+                }
+                CalculatorTilePriorityService.stop(this@CalculatorTileService)
+            }
         }
+        activeDialog = dialog
+        showDialog(dialog)
     }
 
-    companion object {
-        const val ACTION_LAUNCH_FROM_TILE = "com.monkopedia.quickcalc.action.LAUNCH_FROM_TILE"
-        const val EXTRA_LAUNCHED_FROM_TILE = "extra_launched_from_tile"
+    @Composable
+    private fun QuickSettingsCalculatorDialogContent() {
+        MaterialTheme {
+            Surface(shape = RoundedCornerShape(28.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 420.dp, max = 620.dp)
+                ) {
+                    CalculatorComposeRoute(modifier = Modifier.fillMaxSize())
+                }
+            }
+        }
     }
 }

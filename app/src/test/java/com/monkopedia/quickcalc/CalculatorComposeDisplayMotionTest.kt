@@ -25,8 +25,14 @@ class CalculatorComposeDisplayMotionTest {
 
     @Test
     fun resolveTransition_triggersOnlyForInputToResult() {
-        val previous = CalculatorUiState(formulaText = "1+2", resultText = "3", phase = CalculatorUiPhase.INPUT)
-        val current = CalculatorUiState(formulaText = "3", resultText = "3", phase = CalculatorUiPhase.RESULT)
+        val previous =
+            CalculatorUiState(
+                formulaText = "1+2",
+                resultText = "3",
+                phase = CalculatorUiPhase.INPUT
+            )
+        val current =
+            CalculatorUiState(formulaText = "3", resultText = "3", phase = CalculatorUiPhase.RESULT)
         val transition = resolveDisplayResultTransition(previous, current)
 
         assertNotNull(transition)
@@ -42,8 +48,10 @@ class CalculatorComposeDisplayMotionTest {
 
     @Test
     fun resolveTransition_omitsOutgoingFormulaWhenTextIsSame() {
-        val previous = CalculatorUiState(formulaText = "7", resultText = "7", phase = CalculatorUiPhase.INPUT)
-        val current = CalculatorUiState(formulaText = "7", resultText = "7", phase = CalculatorUiPhase.RESULT)
+        val previous =
+            CalculatorUiState(formulaText = "7", resultText = "7", phase = CalculatorUiPhase.INPUT)
+        val current =
+            CalculatorUiState(formulaText = "7", resultText = "7", phase = CalculatorUiPhase.RESULT)
 
         val transition = resolveDisplayResultTransition(previous, current)
 

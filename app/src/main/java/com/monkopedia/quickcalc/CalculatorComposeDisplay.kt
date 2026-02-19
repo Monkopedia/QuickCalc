@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("ktlint:standard:function-naming")
+
 package com.monkopedia.quickcalc
 
 import android.graphics.Paint
@@ -30,6 +32,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,9 +62,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.Text
 
 private val LEGACY_ACCELERATE_DECELERATE_EASING = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
 private const val RESULT_ANIMATION_FALLBACK_DURATION_MS = 420
@@ -80,7 +81,8 @@ internal fun DisplayPanel(
     val density = LocalDensity.current
     val resultInsets = legacyTrimmedInsets(style.resultInsets, style.resultSizeSp.sp)
     val formulaRowHeightPx = remember(style, density) { formulaRowMinHeightPx(style, density) }
-    val formulaRowHeightDp = remember(style, density) { with(density) { formulaRowHeightPx.toDp() } }
+    val formulaRowHeightDp =
+        remember(style, density) { with(density) { formulaRowHeightPx.toDp() } }
     val resultRowHeightPx = remember(style, density) { resultRowHeightPx(style, density) }
     val resultRowHeightDp = remember(style, density) { with(density) { resultRowHeightPx.toDp() } }
     val displayHeightDp = formulaRowHeightDp + resultRowHeightDp
@@ -183,11 +185,11 @@ internal fun DisplayPanel(
                 DisplayResultTransitionRows(
                     transition = transition,
                     progress =
-                        if (frameTransition != null) {
-                            frameProgress
-                        } else {
-                            1f
-                        },
+                    if (frameTransition != null) {
+                        frameProgress
+                    } else {
+                        1f
+                    },
                     transitionMetrics = transitionMetrics,
                     style = style,
                     formulaColor = formulaColor,
@@ -273,7 +275,7 @@ private fun DisplayResultTransitionRows(
                 translationX = lerpFloat(0f, transitionMetrics.resultTranslationX, clampedProgress)
                 translationY =
                     formulaRowHeightPx +
-                        lerpFloat(0f, transitionMetrics.resultTranslationY, clampedProgress)
+                    lerpFloat(0f, transitionMetrics.resultTranslationY, clampedProgress)
             }
     ) {
         ResultRowText(
@@ -307,7 +309,8 @@ private fun rememberLegacyResultTransitionMetrics(
         density
     ) {
         val maxFormulaSize = style.formulaMaxSizeSp.sp
-        val baseFormulaInsetsPx = legacyTrimmedInsetsPx(style.formulaInsets, maxFormulaSize, density)
+        val baseFormulaInsetsPx =
+            legacyTrimmedInsetsPx(style.formulaInsets, maxFormulaSize, density)
         val formulaAvailableWidthPx =
             (displayWidthPx - baseFormulaInsetsPx.start - baseFormulaInsetsPx.end)
                 .coerceAtLeast(0f)
@@ -326,8 +329,10 @@ private fun rememberLegacyResultTransitionMetrics(
             ).size.width.toFloat()
         }
 
-        val resultInsetsPx = legacyTrimmedInsetsPx(style.resultInsets, style.resultSizeSp.sp, density)
-        val formulaInsetsPx = legacyTrimmedInsetsPx(style.formulaInsets, targetFormulaSizeSp.sp, density)
+        val resultInsetsPx =
+            legacyTrimmedInsetsPx(style.resultInsets, style.resultSizeSp.sp, density)
+        val formulaInsetsPx =
+            legacyTrimmedInsetsPx(style.formulaInsets, targetFormulaSizeSp.sp, density)
 
         computeLegacyResultTransitionMetrics(
             resultTextSizePx = with(density) { style.resultSizeSp.sp.toPx() },
@@ -487,14 +492,13 @@ private fun computeFittingTextSizeSp(
     return bestSize.coerceIn(minSizeSp.toFloat(), maxSizeSp.toFloat())
 }
 
-private data class PxInsets(
-    val start: Float,
-    val end: Float,
-    val top: Float,
-    val bottom: Float
-)
+private data class PxInsets(val start: Float, val end: Float, val top: Float, val bottom: Float)
 
-private fun legacyTrimmedInsetsPx(baseInsets: EdgeInsets, fontSize: TextUnit, density: Density): PxInsets {
+private fun legacyTrimmedInsetsPx(
+    baseInsets: EdgeInsets,
+    fontSize: TextUnit,
+    density: Density
+): PxInsets {
     val baseTopPx = with(density) { baseInsets.top.toPx() }
     val baseBottomPx = with(density) { baseInsets.bottom.toPx() }
     val textSizePx = with(density) { fontSize.toPx() }

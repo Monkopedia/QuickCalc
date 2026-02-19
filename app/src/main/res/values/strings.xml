@@ -21,7 +21,34 @@
     <string name="app_name">Calculator</string>
     <!-- Label shown in Quick Settings tile picker/list. -->
     <string name="quick_settings_tile_label" translatable="false">Calculator</string>
-
+    <!-- Title for the launcher settings screen that controls the Quick Settings tile. -->
+    <string name="quick_settings_settings_title" translatable="false">Quick Settings Tile</string>
+    <!-- Description for the launcher settings screen. -->
+    <string name="quick_settings_settings_description" translatable="false">Use this screen to add the Calculator tile to Quick Settings.</string>
+    <!-- Action for requesting tile addition to Quick Settings. -->
+    <string name="quick_settings_add_tile_action" translatable="false">Add Tile to Quick Settings</string>
+    <!-- Result shown when adding tiles is unsupported on this Android version. -->
+    <string name="quick_settings_add_tile_requires_tiramisu" translatable="false">Adding tiles from the app requires Android 13 or newer.</string>
+    <!-- Result shown when StatusBarManager is unavailable. -->
+    <string name="quick_settings_add_tile_status_bar_unavailable" translatable="false">Quick Settings is not available right now.</string>
+    <!-- Result shown when tile add request succeeds with a new tile. -->
+    <string name="quick_settings_add_tile_result_added" translatable="false">Tile added to Quick Settings.</string>
+    <!-- Result shown when tile was already present in Quick Settings. -->
+    <string name="quick_settings_add_tile_result_already_added" translatable="false">Tile is already added.</string>
+    <!-- Result shown when the user declines or request is denied. -->
+    <string name="quick_settings_add_tile_result_not_added" translatable="false">Tile was not added.</string>
+    <!-- Result shown when add-tile callback returns an unrecognized code. -->
+    <string name="quick_settings_add_tile_result_other" translatable="false">Tile request result: %1$d</string>
+    <!-- Result shown when add-tile request is made while app is not foreground. -->
+    <string name="quick_settings_add_tile_result_not_foreground" translatable="false">Bring the app to the foreground and try again.</string>
+    <!-- Result shown when tile component is not accepted by system. -->
+    <string name="quick_settings_add_tile_result_bad_component" translatable="false">Tile component is not available.</string>
+    <!-- Foreground service notification channel label for quick settings calculator boost. -->
+    <string name="quick_settings_priority_notification_channel_name" translatable="false">Quick Settings Calculator</string>
+    <!-- Foreground service notification title while calculator is shown from quick settings. -->
+    <string name="quick_settings_priority_notification_title" translatable="false">Calculator running in Quick Settings</string>
+    <!-- Foreground service notification text while calculator is shown from quick settings. -->
+    <string name="quick_settings_priority_notification_text" translatable="false">Improving responsiveness while the Quick Settings calculator is open.</string>
     <!-- Error displayed when expression evaluates to NaN. [CHAR_LIMIT=14] -->
     <string name="error_nan">Not a number</string>
     <!-- Error displayed when expression contains a syntax error. [CHAR_LIMIT=14] -->

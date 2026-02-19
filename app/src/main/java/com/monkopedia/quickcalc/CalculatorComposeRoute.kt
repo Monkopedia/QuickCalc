@@ -38,21 +38,21 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.ClipboardManager
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.AnnotatedString
@@ -355,19 +355,17 @@ private fun copyExpressionToClipboard(
     }
 }
 
-private fun Char.isCalculatorInputChar(): Boolean =
-    isDigit() ||
-        isLetter() ||
-        this in "+-*/().,%!^" ||
-        this in setOf('×', '÷', '−', '–', '—')
+private fun Char.isCalculatorInputChar(): Boolean = isDigit() ||
+    isLetter() ||
+    this in "+-*/().,%!^" ||
+    this in setOf('×', '÷', '−', '–', '—')
 
-private fun Char.normalizedCalculatorToken(): String =
-    when (this) {
-        '×', 'x', 'X' -> "*"
-        '÷' -> "/"
-        '−', '–', '—' -> "-"
-        else -> toString()
-    }
+private fun Char.normalizedCalculatorToken(): String = when (this) {
+    '×', 'x', 'X' -> "*"
+    '÷' -> "/"
+    '−', '–', '—' -> "-"
+    else -> toString()
+}
 
 @Composable
 private fun ApplyLegacyStatusBarColor(state: CalculatorUiState) {
@@ -386,12 +384,11 @@ private fun ApplyLegacyStatusBarColor(state: CalculatorUiState) {
     }
 }
 
-private tailrec fun Context.findActivity(): android.app.Activity? =
-    when (this) {
-        is android.app.Activity -> this
-        is ContextWrapper -> baseContext.findActivity()
-        else -> null
-    }
+private tailrec fun Context.findActivity(): android.app.Activity? = when (this) {
+    is android.app.Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
 
 private fun calculatorUiStateSaver(): Saver<CalculatorUiState, Any> = mapSaver(
     save = { state ->
