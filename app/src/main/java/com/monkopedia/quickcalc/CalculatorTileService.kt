@@ -81,7 +81,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 @RequiresApi(Build.VERSION_CODES.N)
@@ -116,7 +115,6 @@ class CalculatorTileService : TileService() {
     private var dialogWindowStabilizer: Runnable? = null
     private var dialogWindowFocusChangeListener:
         ViewTreeObserver.OnWindowFocusChangeListener? = null
-    private var hasLoadedSettingsSnapshot: Boolean = false
     private val autosaveSignals = MutableSharedFlow<Unit>(
         replay = 0,
         extraBufferCapacity = 1,
@@ -141,7 +139,6 @@ class CalculatorTileService : TileService() {
                 val rememberStateChanged =
                     cachedSettings.rememberCalculatorState != settings.rememberCalculatorState
                 cachedSettings = settings
-                hasLoadedSettingsSnapshot = true
                 if (backgroundChanged) {
                     applyDialogWindowBackgroundEffect(activeDialog, settings, force = true)
                 }
@@ -203,7 +200,6 @@ class CalculatorTileService : TileService() {
     }
 
     private fun showCalculatorDialog() {
-        ensureSettingsLoadedForDialog()
         val composeView = ComposeView(this).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setContent {
@@ -301,14 +297,12 @@ class CalculatorTileService : TileService() {
                 lastAppliedBackgroundSignature = null
                 inactivityCloseJob?.cancel()
                 inactivityCloseJob = null
-                runCatching {
-                    runBlocking {
-                        withContext(Dispatchers.IO + NonCancellable) {
-                            persistAutosaveSnapshot(force = true)
-                        }
+                serviceScope.launch(Dispatchers.IO + NonCancellable) {
+                    runCatching {
+                        persistAutosaveSnapshot(force = true)
+                    }.onFailure { throwable ->
+                        Log.w(TAG, "Failed to persist tile snapshot during dismiss", throwable)
                     }
-                }.onFailure { throwable ->
-                    Log.w(TAG, "Failed to persist tile snapshot during dismiss", throwable)
                 }
                 CalculatorTilePriorityService.stop(this@CalculatorTileService)
             }
@@ -328,19 +322,6 @@ class CalculatorTileService : TileService() {
             }
             throw throwable
         }
-    }
-
-    private fun ensureSettingsLoadedForDialog() {
-        if (hasLoadedSettingsSnapshot) {
-            return
-        }
-        val snapshot = runBlocking {
-            withContext(Dispatchers.IO) {
-                settingsRepository.snapshot()
-            }
-        }
-        cachedSettings = snapshot
-        hasLoadedSettingsSnapshot = true
     }
 
     private fun trace(event: String) {
