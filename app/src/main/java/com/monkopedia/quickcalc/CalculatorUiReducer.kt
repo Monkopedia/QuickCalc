@@ -62,13 +62,10 @@ class CalculatorUiReducer(context: Context) {
         }
 
     private fun evaluateForInput(formulaText: String): CalculatorUiState {
-        var evaluatedResult = ""
-        evaluator.evaluate(formulaText) { _, result, _ ->
-            evaluatedResult = result.orEmpty()
-        }
+        val result = evaluator.evaluate(formulaText)
         return CalculatorUiState(
             formulaText = formulaText,
-            resultText = evaluatedResult,
+            resultText = (result as? EvaluationResult.Success)?.result.orEmpty(),
             phase = CalculatorUiPhase.INPUT
         )
     }
@@ -78,34 +75,24 @@ class CalculatorUiReducer(context: Context) {
             return previous
         }
 
-        var nextState = previous.copy(phase = CalculatorUiPhase.EVALUATE)
-        evaluator.evaluate(previous.formulaText) { _, result, errorResourceId ->
-            nextState = when {
-                errorResourceId != INVALID_RES_ID -> {
-                    CalculatorUiState(
-                        formulaText = previous.formulaText,
-                        resultText = applicationContext.getString(errorResourceId),
-                        phase = CalculatorUiPhase.ERROR
-                    )
-                }
+        return when (val result = evaluator.evaluate(previous.formulaText)) {
+            is EvaluationResult.Error -> CalculatorUiState(
+                formulaText = previous.formulaText,
+                resultText = applicationContext.getString(result.errorResourceId),
+                phase = CalculatorUiPhase.ERROR
+            )
 
-                !result.isNullOrEmpty() -> {
-                    CalculatorUiState(
-                        formulaText = result,
-                        resultText = result,
-                        phase = CalculatorUiPhase.RESULT
-                    )
-                }
+            is EvaluationResult.Success -> CalculatorUiState(
+                formulaText = result.result,
+                resultText = result.result,
+                phase = CalculatorUiPhase.RESULT
+            )
 
-                else -> {
-                    CalculatorUiState(
-                        formulaText = previous.formulaText,
-                        resultText = "",
-                        phase = CalculatorUiPhase.INPUT
-                    )
-                }
-            }
+            is EvaluationResult.Empty -> CalculatorUiState(
+                formulaText = previous.formulaText,
+                resultText = "",
+                phase = CalculatorUiPhase.INPUT
+            )
         }
-        return nextState
     }
 }

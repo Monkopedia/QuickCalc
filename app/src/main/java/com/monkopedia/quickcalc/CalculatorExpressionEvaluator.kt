@@ -20,6 +20,17 @@ import org.javia.arity.Symbols
 import org.javia.arity.SyntaxException
 import org.javia.arity.Util
 
+sealed interface EvaluationResult {
+    val normalizedExpression: String
+
+    data class Empty(override val normalizedExpression: String) : EvaluationResult
+    data class Success(override val normalizedExpression: String, val result: String) :
+        EvaluationResult
+
+    data class Error(override val normalizedExpression: String, val errorResourceId: Int) :
+        EvaluationResult
+}
+
 class CalculatorExpressionEvaluator(private val tokenizer: CalculatorExpressionTokenizer) {
     /**
      * The maximum number of significant digits to display.
@@ -34,11 +45,7 @@ class CalculatorExpressionEvaluator(private val tokenizer: CalculatorExpressionT
 
     private val symbols = Symbols()
 
-    fun evaluate(expression: CharSequence, callback: EvaluateCallback) {
-        evaluate(expression.toString(), callback)
-    }
-
-    fun evaluate(expression: String, callback: EvaluateCallback) {
+    fun evaluate(expression: String): EvaluationResult {
         var expr = tokenizer.getNormalizedExpression(expression)
 
         while (expr.isNotEmpty() && "+-/*".indexOf(expr.last()) != -1) {
@@ -46,22 +53,36 @@ class CalculatorExpressionEvaluator(private val tokenizer: CalculatorExpressionT
         }
 
         if (expr.isEmpty() || expr.toDoubleOrNull() != null) {
-            callback.onEvaluate(expr, null, INVALID_RES_ID)
-            return
+            return EvaluationResult.Empty(expr)
         }
 
-        try {
+        return try {
             val result = symbols.eval(expr)
             if (result.isNaN()) {
-                callback.onEvaluate(expr, null, R.string.error_nan)
+                EvaluationResult.Error(expr, R.string.error_nan)
             } else {
                 val resultString = tokenizer.getLocalizedExpression(
                     Util.doubleToString(result, maxDigits, roundingDigits)
                 )
-                callback.onEvaluate(expr, resultString, INVALID_RES_ID)
+                EvaluationResult.Success(expr, resultString)
             }
         } catch (_: SyntaxException) {
-            callback.onEvaluate(expr, null, R.string.error_syntax)
+            EvaluationResult.Error(expr, R.string.error_syntax)
+        }
+    }
+
+    fun evaluate(expression: CharSequence, callback: EvaluateCallback) {
+        evaluate(expression.toString(), callback)
+    }
+
+    fun evaluate(expression: String, callback: EvaluateCallback) {
+        when (val result = evaluate(expression)) {
+            is EvaluationResult.Empty ->
+                callback.onEvaluate(result.normalizedExpression, null, INVALID_RES_ID)
+            is EvaluationResult.Success ->
+                callback.onEvaluate(result.normalizedExpression, result.result, INVALID_RES_ID)
+            is EvaluationResult.Error ->
+                callback.onEvaluate(result.normalizedExpression, null, result.errorResourceId)
         }
     }
 
