@@ -74,7 +74,7 @@ fun CalculatorComposeRoute(
     onCalculatorStateChange: ((CalculatorUiState) -> Unit)? = null
 ) {
     val context = LocalContext.current
-    val reducer = remember(context) {
+    val reducer = remember {
         CalculatorUiReducer(context.applicationContext)
     }
     var uiState by rememberSaveable(
