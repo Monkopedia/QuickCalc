@@ -154,8 +154,13 @@ class CalculatorTileService : TileService() {
             autosaveSignals
                 .collectLatest {
                     delay(AUTOSAVE_DEBOUNCE_MS)
+                    val snapshot = AutosaveSnapshot(
+                        transform = latestDynamicTransform,
+                        calculatorState = latestCalculatorState,
+                        rememberState = cachedSettings.rememberCalculatorState
+                    )
                     withContext(Dispatchers.IO) {
-                        persistAutosaveSnapshot()
+                        persistAutosaveSnapshot(snapshot)
                     }
                 }
         }
@@ -297,9 +302,14 @@ class CalculatorTileService : TileService() {
                 lastAppliedBackgroundSignature = null
                 inactivityCloseJob?.cancel()
                 inactivityCloseJob = null
+                val dismissSnapshot = AutosaveSnapshot(
+                    transform = latestDynamicTransform,
+                    calculatorState = latestCalculatorState,
+                    rememberState = cachedSettings.rememberCalculatorState
+                )
                 serviceScope.launch(Dispatchers.IO + NonCancellable) {
                     runCatching {
-                        persistAutosaveSnapshot(force = true)
+                        persistAutosaveSnapshot(dismissSnapshot, force = true)
                     }.onFailure { throwable ->
                         Log.w(TAG, "Failed to persist tile snapshot during dismiss", throwable)
                     }
@@ -348,10 +358,13 @@ class CalculatorTileService : TileService() {
         CalculatorTilePriorityService.start(this)
     }
 
-    private suspend fun persistAutosaveSnapshot(force: Boolean = false) {
-        val transformSnapshot = latestDynamicTransform
-        val calculatorStateSnapshot = latestCalculatorState
-        val rememberStateSnapshot = cachedSettings.rememberCalculatorState
+    private suspend fun persistAutosaveSnapshot(
+        snapshot: AutosaveSnapshot,
+        force: Boolean = false
+    ) {
+        val transformSnapshot = snapshot.transform
+        val calculatorStateSnapshot = snapshot.calculatorState
+        val rememberStateSnapshot = snapshot.rememberState
 
         if (transformSnapshot != null &&
             (force || transformSnapshot != lastPersistedTransform)
@@ -538,6 +551,12 @@ class CalculatorTileService : TileService() {
         dialogWindowFocusChangeListener = null
     }
 }
+
+internal data class AutosaveSnapshot(
+    val transform: DynamicTransform?,
+    val calculatorState: CalculatorUiState,
+    val rememberState: Boolean
+)
 
 internal data class DynamicTransform(
     val scale: Float,
