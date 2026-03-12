@@ -240,58 +240,8 @@ class CalculatorTileService : TileService() {
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
             )
-            setOnShowListener {
-                trace("dialog_onShow")
-                window?.setLayout(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                window?.setWindowAnimations(0)
-                window?.decorView?.setPadding(0, 0, 0, 0)
-                window?.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
-                windowEffects.applyBackgroundEffect(this, cachedSettings, force = true)
-                windowEffects.installFocusBlurHook(this, cachedSettings)
-                // Re-apply after attachment/animation settles to avoid first-frame drops.
-                window?.decorView?.post {
-                    if (isShowing) {
-                        windowEffects.applyBackgroundEffect(this, cachedSettings, force = true)
-                    }
-                }
-                mainHandler.postDelayed({
-                    if (isShowing) {
-                        windowEffects.applyBackgroundEffect(this, cachedSettings, force = true)
-                    }
-                }, 90L)
-                windowEffects.startStabilizer(this, cachedSettings)
-                scheduleInactivityAutoClose()
-            }
-            setOnDismissListener {
-                trace("dialog_onDismiss")
-                windowEffects.stopStabilizer(this)
-                windowEffects.removeFocusBlurHook(this)
-                if (activeDialog === this) {
-                    activeDialog = null
-                }
-                if (activeDialogRef?.get() === this) {
-                    activeDialogRef = null
-                }
-                windowEffects.clearSignature()
-                inactivityCloseJob?.cancel()
-                inactivityCloseJob = null
-                val dismissSnapshot = AutosaveSnapshot(
-                    transform = latestDynamicTransform,
-                    calculatorState = latestCalculatorState,
-                    rememberState = cachedSettings.rememberCalculatorState
-                )
-                serviceScope.launch(Dispatchers.IO + NonCancellable) {
-                    runCatching {
-                        autosaveManager.persistNow(dismissSnapshot)
-                    }.onFailure { throwable ->
-                        Log.w(TAG, "Failed to persist tile snapshot during dismiss", throwable)
-                    }
-                }
-                CalculatorTilePriorityService.stop(this@CalculatorTileService)
-            }
+            setOnShowListener { onDialogShown(this) }
+            setOnDismissListener { onDialogDismissed(this) }
         }
         windowEffects.applyBackgroundEffect(dialog, cachedSettings, force = true)
         activeDialog = dialog
@@ -308,6 +258,59 @@ class CalculatorTileService : TileService() {
             }
             throw throwable
         }
+    }
+
+    private fun onDialogShown(dialog: ComponentDialog) {
+        trace("dialog_onShow")
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        dialog.window?.decorView?.setPadding(0, 0, 0, 0)
+        dialog.window?.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
+        windowEffects.applyBackgroundEffect(dialog, cachedSettings, force = true)
+        windowEffects.installFocusBlurHook(dialog, cachedSettings)
+        // Re-apply after attachment/animation settles to avoid first-frame drops.
+        dialog.window?.decorView?.post {
+            if (dialog.isShowing) {
+                windowEffects.applyBackgroundEffect(dialog, cachedSettings, force = true)
+            }
+        }
+        mainHandler.postDelayed({
+            if (dialog.isShowing) {
+                windowEffects.applyBackgroundEffect(dialog, cachedSettings, force = true)
+            }
+        }, 90L)
+        windowEffects.startStabilizer(dialog, cachedSettings)
+        scheduleInactivityAutoClose()
+    }
+
+    private fun onDialogDismissed(dialog: ComponentDialog) {
+        trace("dialog_onDismiss")
+        windowEffects.stopStabilizer(dialog)
+        windowEffects.removeFocusBlurHook(dialog)
+        if (activeDialog === dialog) {
+            activeDialog = null
+        }
+        if (activeDialogRef?.get() === dialog) {
+            activeDialogRef = null
+        }
+        windowEffects.clearSignature()
+        inactivityCloseJob?.cancel()
+        inactivityCloseJob = null
+        val dismissSnapshot = AutosaveSnapshot(
+            transform = latestDynamicTransform,
+            calculatorState = latestCalculatorState,
+            rememberState = cachedSettings.rememberCalculatorState
+        )
+        serviceScope.launch(Dispatchers.IO + NonCancellable) {
+            runCatching {
+                autosaveManager.persistNow(dismissSnapshot)
+            }.onFailure { throwable ->
+                Log.w(TAG, "Failed to persist tile snapshot during dismiss", throwable)
+            }
+        }
+        CalculatorTilePriorityService.stop(this)
     }
 
     private fun trace(event: String) {

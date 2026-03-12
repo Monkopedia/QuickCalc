@@ -87,7 +87,7 @@ const val MIN_DIALOG_INACTIVITY_TIMEOUT_SECONDS = 15
 const val MAX_DIALOG_INACTIVITY_TIMEOUT_SECONDS = 300
 const val MIN_DIALOG_SCALE = 0.45f
 const val MAX_DIALOG_SCALE = 1.35f
-const val MIN_STATIC_SIZE_FRACTION = 0.4f
+const val MIN_STATIC_SIZE_FRACTION = 0.55f
 const val MAX_STATIC_SIZE_FRACTION = 1.0f
 
 fun normalizeDialogInactivityTimeoutSeconds(seconds: Int): Int =
