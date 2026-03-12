@@ -27,10 +27,6 @@
     <string name="quick_settings_settings_description" translatable="false">Use this screen to add the Calculator tile to Quick Settings.</string>
     <!-- Action for requesting tile addition to Quick Settings. -->
     <string name="quick_settings_add_tile_action" translatable="false">Add Tile to Quick Settings</string>
-    <!-- Temporary debug action to open a standard app dialog with the same blur settings. -->
-    <string name="quick_settings_open_debug_dialog" translatable="false">Open Standard Debug Dialog</string>
-    <!-- Title shown inside the standard app debug dialog. -->
-    <string name="quick_settings_debug_dialog_title" translatable="false">Standard App Dialog Debug</string>
     <!-- Result shown when adding tiles is unsupported on this Android version. -->
     <string name="quick_settings_add_tile_requires_tiramisu" translatable="false">Adding tiles from the app requires Android 13 or newer.</string>
     <!-- Result shown when StatusBarManager is unavailable. -->
@@ -69,6 +65,48 @@
     <string name="settings_auto_close_on_inactivity" translatable="false">Auto-close dialog on inactivity</string>
     <!-- Setting label for inactivity timeout slider in seconds. -->
     <string name="settings_auto_close_timeout_seconds" translatable="false">Timeout: %1$d seconds</string>
+    <!-- Settings section heading for behavior controls. -->
+    <string name="settings_section_behavior" translatable="false">Behavior</string>
+    <!-- Theme mode label: System. -->
+    <string name="settings_theme_system" translatable="false">System</string>
+    <!-- Theme mode label: Light. -->
+    <string name="settings_theme_light" translatable="false">Light</string>
+    <!-- Theme mode label: Dark. -->
+    <string name="settings_theme_dark" translatable="false">Dark</string>
+    <!-- Size mode label: Static size. -->
+    <string name="settings_size_static" translatable="false">Static size</string>
+    <!-- Size mode label: Dynamic with drag and pinch. -->
+    <string name="settings_size_dynamic" translatable="false">Dynamic (drag + pinch)</string>
+    <!-- Dialog background label: Clear. -->
+    <string name="settings_bg_clear" translatable="false">Clear</string>
+    <!-- Dialog background label: Light overlay. -->
+    <string name="settings_bg_light" translatable="false">Light</string>
+    <!-- Dialog background label: Dark overlay. -->
+    <string name="settings_bg_dark" translatable="false">Dark</string>
+    <!-- Dialog background label: Light blur. -->
+    <string name="settings_bg_blur_light" translatable="false">Light blur</string>
+    <!-- Dialog background label: Medium blur. -->
+    <string name="settings_bg_blur_medium" translatable="false">Medium blur</string>
+    <!-- Dialog background label: Heavy blur. -->
+    <string name="settings_bg_blur_heavy" translatable="false">Heavy blur</string>
+    <!-- Accent color label: System. -->
+    <string name="settings_accent_system" translatable="false">System</string>
+    <!-- Accent color label: Cyan. -->
+    <string name="settings_accent_cyan" translatable="false">Cyan</string>
+    <!-- Accent color label: Blue. -->
+    <string name="settings_accent_blue" translatable="false">Blue</string>
+    <!-- Accent color label: Green. -->
+    <string name="settings_accent_green" translatable="false">Green</string>
+    <!-- Accent color label: Orange. -->
+    <string name="settings_accent_orange" translatable="false">Orange</string>
+    <!-- Accent color label: Pink. -->
+    <string name="settings_accent_pink" translatable="false">Pink</string>
+    <!-- Accent color label: Red. -->
+    <string name="settings_accent_red" translatable="false">Red</string>
+    <!-- Accent color label: Purple. -->
+    <string name="settings_accent_purple" translatable="false">Purple</string>
+    <!-- Accent color label: Teal. -->
+    <string name="settings_accent_teal" translatable="false">Teal</string>
     <!-- Foreground service notification channel label for quick settings calculator boost. -->
     <string name="quick_settings_priority_notification_channel_name" translatable="false">Quick Settings Calculator</string>
     <!-- Foreground service notification title while calculator is shown from quick settings. -->

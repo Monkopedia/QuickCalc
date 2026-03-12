@@ -66,18 +66,18 @@ data class TileSettings(
     val savedCalculatorState: CalculatorUiState = CalculatorUiState()
 )
 
-data class TileAccentOption(val label: String, val colorArgb: Int)
+data class TileAccentOption(val labelResId: Int, val colorArgb: Int)
 
 val TILE_ACCENT_OPTIONS = listOf(
-    TileAccentOption("System", SYSTEM_ACCENT_COLOR_ARGB),
-    TileAccentOption("Cyan", 0xFF00BCD4.toInt()),
-    TileAccentOption("Blue", 0xFF2196F3.toInt()),
-    TileAccentOption("Green", 0xFF4CAF50.toInt()),
-    TileAccentOption("Orange", 0xFFFF9800.toInt()),
-    TileAccentOption("Pink", 0xFFE91E63.toInt()),
-    TileAccentOption("Red", 0xFFF44336.toInt()),
-    TileAccentOption("Purple", 0xFF673AB7.toInt()),
-    TileAccentOption("Teal", 0xFF009688.toInt())
+    TileAccentOption(R.string.settings_accent_system, SYSTEM_ACCENT_COLOR_ARGB),
+    TileAccentOption(R.string.settings_accent_cyan, 0xFF00BCD4.toInt()),
+    TileAccentOption(R.string.settings_accent_blue, 0xFF2196F3.toInt()),
+    TileAccentOption(R.string.settings_accent_green, 0xFF4CAF50.toInt()),
+    TileAccentOption(R.string.settings_accent_orange, 0xFFFF9800.toInt()),
+    TileAccentOption(R.string.settings_accent_pink, 0xFFE91E63.toInt()),
+    TileAccentOption(R.string.settings_accent_red, 0xFFF44336.toInt()),
+    TileAccentOption(R.string.settings_accent_purple, 0xFF673AB7.toInt()),
+    TileAccentOption(R.string.settings_accent_teal, 0xFF009688.toInt())
 )
 
 const val SYSTEM_ACCENT_COLOR_ARGB = Int.MIN_VALUE

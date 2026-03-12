@@ -20,17 +20,10 @@ package com.monkopedia.quickcalc
 
 import android.app.StatusBarManager
 import android.content.ComponentName
-import android.content.res.Configuration
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
-import androidx.activity.ComponentDialog
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,7 +36,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -74,21 +66,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 class QuickSettingsSettingsActivity : ComponentActivity() {
-
-    companion object {
-        private const val TAG = "QuickSettingsSettings"
-    }
 
     private val settingsRepository by lazy { TileSettingsRepository(applicationContext) }
 
@@ -109,9 +94,6 @@ class QuickSettingsSettingsActivity : ComponentActivity() {
                         requestAddTile { resultMessage ->
                             statusMessage = resultMessage
                         }
-                    },
-                    onRequestOpenDebugDialogClick = {
-                        openStandardDebugDialog(settings)
                     },
                     onThemeModeSelected = { mode ->
                         coroutineScope.launch { settingsRepository.setThemeMode(mode) }
@@ -144,112 +126,6 @@ class QuickSettingsSettingsActivity : ComponentActivity() {
                 )
             }
         }
-    }
-
-    private fun openStandardDebugDialog(settings: TileSettings) {
-        var focusChangeListener: ViewTreeObserver.OnWindowFocusChangeListener? = null
-        val dialog = ComponentDialog(this, R.style.CalculatorTileDialogTheme).apply {
-            val composeView = ComposeView(this@QuickSettingsSettingsActivity).apply {
-                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-                setContent {
-                    TileSettingsTheme(settings = settings) {
-                        StandardDebugDialogContent(onDismissRequest = { dismiss() })
-                    }
-                }
-            }
-            setContentView(
-                composeView,
-                ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-            )
-            setCanceledOnTouchOutside(true)
-            setOnShowListener {
-                window?.setLayout(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                window?.setWindowAnimations(0)
-                window?.decorView?.setPadding(0, 0, 0, 0)
-                window?.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
-                applyStandardDebugDialogBackground(this, settings)
-                val decorView = window?.decorView
-                decorView?.isFocusableInTouchMode = true
-                decorView?.requestFocus()
-                decorView?.requestFocusFromTouch()
-                val listener = ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
-                    Log.i(TAG, "standardDebugDialog window_focus_changed hasFocus=$hasFocus")
-                    if (hasFocus) {
-                        applyStandardDebugDialogBackground(this, settings)
-                    }
-                }
-                focusChangeListener = listener
-                decorView?.viewTreeObserver?.addOnWindowFocusChangeListener(listener)
-                window?.decorView?.post {
-                    if (isShowing) {
-                        applyStandardDebugDialogBackground(this, settings)
-                    }
-                }
-                window?.decorView?.postDelayed({
-                    if (isShowing) {
-                        applyStandardDebugDialogBackground(this, settings)
-                    }
-                }, 90L)
-            }
-            setOnDismissListener {
-                val decorView = window?.decorView
-                val listener = focusChangeListener
-                if (listener != null) {
-                    val observer = decorView?.viewTreeObserver
-                    if (observer != null && observer.isAlive) {
-                        observer.removeOnWindowFocusChangeListener(listener)
-                    }
-                }
-                focusChangeListener = null
-            }
-        }
-        dialog.show()
-    }
-
-    private fun applyStandardDebugDialogBackground(
-        dialog: ComponentDialog,
-        settings: TileSettings
-    ) {
-        val window = dialog.window ?: return
-        val darkTheme = isDialogDarkTheme(settings, isSystemDark = isSystemNightMode())
-        val mode = settings.dialogBackgroundMode
-        val overlayColor = dialogWindowOverlayColorArgb(mode, darkTheme)
-        val blurRadius = dialogWindowBackgroundBlurRadiusPx(mode)
-        window.setBackgroundDrawable(ColorDrawable(overlayColor))
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val attributes = window.attributes
-            if (blurRadius > 0) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-                window.setDimAmount(BLUR_DIM_AMOUNT)
-                window.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
-                attributes.blurBehindRadius = blurRadius
-            } else {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-                window.clearFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
-                attributes.blurBehindRadius = 0
-            }
-            window.attributes = attributes
-            window.setBackgroundBlurRadius(blurRadius)
-            window.decorView.postInvalidateOnAnimation()
-        }
-        Log.i(
-            TAG,
-            "standardDebugDialog mode=$mode overlayAlpha=${android.graphics.Color.alpha(
-                overlayColor
-            )} " +
-                "blurRadius=$blurRadius"
-        )
-    }
-
-    private fun isSystemNightMode(): Boolean {
-        val nightModeMask = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return nightModeMask == Configuration.UI_MODE_NIGHT_YES
     }
 
     private fun requestAddTile(onResult: (String) -> Unit) {
@@ -301,7 +177,6 @@ private fun QuickSettingsSettingsScreen(
     blurSupported: Boolean,
     statusMessage: String?,
     onRequestAddTileClick: () -> Unit,
-    onRequestOpenDebugDialogClick: () -> Unit,
     onThemeModeSelected: (TileThemeMode) -> Unit,
     onAccentColorSelected: (Int) -> Unit,
     onDialogBackgroundModeSelected: (TileDialogBackgroundMode) -> Unit,
@@ -355,14 +230,6 @@ private fun QuickSettingsSettingsScreen(
                             ) {
                                 Text(text = stringResource(R.string.quick_settings_add_tile_action))
                             }
-                            FilledTonalButton(
-                                onClick = onRequestOpenDebugDialogClick,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.quick_settings_open_debug_dialog)
-                                )
-                            }
                             if (statusMessage != null) {
                                 Surface(
                                     shape = RoundedCornerShape(14.dp),
@@ -389,7 +256,7 @@ private fun QuickSettingsSettingsScreen(
                         ChoicePillRow(
                             options = TileThemeMode.entries,
                             selectedOption = settings.themeMode,
-                            optionLabel = ::modeLabel,
+                            optionLabel = { modeLabel(it) },
                             onOptionSelected = onThemeModeSelected
                         )
                     }
@@ -412,7 +279,7 @@ private fun QuickSettingsSettingsScreen(
                         ChoicePillRow(
                             options = BASIC_DIALOG_BACKGROUND_OPTIONS,
                             selectedOption = settings.dialogBackgroundMode,
-                            optionLabel = ::dialogBackgroundLabel,
+                            optionLabel = { dialogBackgroundLabel(it) },
                             onOptionSelected = onDialogBackgroundModeSelected
                         )
                         if (blurSupported) {
@@ -420,7 +287,7 @@ private fun QuickSettingsSettingsScreen(
                             ChoicePillRow(
                                 options = BLUR_DIALOG_BACKGROUND_OPTIONS,
                                 selectedOption = settings.dialogBackgroundMode,
-                                optionLabel = ::dialogBackgroundLabel,
+                                optionLabel = { dialogBackgroundLabel(it) },
                                 onOptionSelected = onDialogBackgroundModeSelected
                             )
                         }
@@ -433,7 +300,7 @@ private fun QuickSettingsSettingsScreen(
                         ChoicePillRow(
                             options = TileSizeMode.entries,
                             selectedOption = settings.sizeMode,
-                            optionLabel = ::sizeModeLabel,
+                            optionLabel = { sizeModeLabel(it) },
                             onOptionSelected = onSizeModeSelected
                         )
                         Spacer(modifier = Modifier.height(12.dp))
@@ -482,7 +349,9 @@ private fun QuickSettingsSettingsScreen(
                     }
                 }
                 item {
-                    SettingsSectionCard(title = "Behavior") {
+                    SettingsSectionCard(
+                        title = stringResource(R.string.settings_section_behavior)
+                    ) {
                         val isAutoCloseEnabled =
                             settings.dialogInactivityTimeoutSeconds >
                                 DIALOG_INACTIVITY_TIMEOUT_OFF_SECONDS
@@ -539,36 +408,6 @@ private fun QuickSettingsSettingsScreen(
 }
 
 @Composable
-private fun StandardDebugDialogContent(onDismissRequest: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(onClick = onDismissRequest),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth(0.82f)
-                .fillMaxHeight(0.62f)
-                .clickable(onClick = {}),
-            shape = RoundedCornerShape(28.dp)
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.quick_settings_debug_dialog_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(24.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun SettingsSectionCard(title: String, content: @Composable ColumnScope.() -> Unit) {
     Card(
         shape = RoundedCornerShape(22.dp),
@@ -596,7 +435,7 @@ private fun SettingsSectionCard(title: String, content: @Composable ColumnScope.
 private fun <T> ChoicePillRow(
     options: List<T>,
     selectedOption: T,
-    optionLabel: (T) -> String,
+    optionLabel: @Composable (T) -> String,
     onOptionSelected: (T) -> Unit
 ) {
     Row(
@@ -703,7 +542,10 @@ private fun AccentChooser(selectedColor: Int, darkTheme: Boolean, onColorSelecte
                             }
                         }
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = option.label, style = MaterialTheme.typography.labelSmall)
+                        Text(
+                            text = stringResource(option.labelResId),
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
                 }
             }
@@ -796,15 +638,17 @@ private fun alignmentMarkerAlignment(alignment: TileStaticAlignment): Alignment 
     TileStaticAlignment.BOTTOM_END -> Alignment.BottomEnd
 }
 
+@Composable
 private fun modeLabel(mode: TileThemeMode): String = when (mode) {
-    TileThemeMode.SYSTEM -> "System"
-    TileThemeMode.LIGHT -> "Light"
-    TileThemeMode.DARK -> "Dark"
+    TileThemeMode.SYSTEM -> stringResource(R.string.settings_theme_system)
+    TileThemeMode.LIGHT -> stringResource(R.string.settings_theme_light)
+    TileThemeMode.DARK -> stringResource(R.string.settings_theme_dark)
 }
 
+@Composable
 private fun sizeModeLabel(mode: TileSizeMode): String = when (mode) {
-    TileSizeMode.STATIC -> "Static size"
-    TileSizeMode.DYNAMIC -> "Dynamic (drag + pinch)"
+    TileSizeMode.STATIC -> stringResource(R.string.settings_size_static)
+    TileSizeMode.DYNAMIC -> stringResource(R.string.settings_size_dynamic)
 }
 
 private val BASIC_DIALOG_BACKGROUND_OPTIONS = listOf(
@@ -819,14 +663,13 @@ private val BLUR_DIALOG_BACKGROUND_OPTIONS = listOf(
     TileDialogBackgroundMode.BLUR_HEAVY
 )
 
+@Composable
 private fun dialogBackgroundLabel(mode: TileDialogBackgroundMode): String = when (mode) {
-    TileDialogBackgroundMode.CLEAR -> "Clear"
-    TileDialogBackgroundMode.LIGHT -> "Light"
-    TileDialogBackgroundMode.DARK -> "Dark"
-    TileDialogBackgroundMode.BLUR_SUBTLE -> "Light blur"
-    TileDialogBackgroundMode.BLUR_LIGHT -> "Medium blur"
-    TileDialogBackgroundMode.BLUR_HEAVY -> "Heavy blur"
-    TileDialogBackgroundMode.BLUR_DEBUG -> "Heavy blur"
+    TileDialogBackgroundMode.CLEAR -> stringResource(R.string.settings_bg_clear)
+    TileDialogBackgroundMode.LIGHT -> stringResource(R.string.settings_bg_light)
+    TileDialogBackgroundMode.DARK -> stringResource(R.string.settings_bg_dark)
+    TileDialogBackgroundMode.BLUR_SUBTLE -> stringResource(R.string.settings_bg_blur_light)
+    TileDialogBackgroundMode.BLUR_LIGHT -> stringResource(R.string.settings_bg_blur_medium)
+    TileDialogBackgroundMode.BLUR_HEAVY -> stringResource(R.string.settings_bg_blur_heavy)
+    TileDialogBackgroundMode.BLUR_DEBUG -> stringResource(R.string.settings_bg_blur_heavy)
 }
-
-private const val BLUR_DIM_AMOUNT = 0.01f

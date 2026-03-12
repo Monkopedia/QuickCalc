@@ -42,11 +42,11 @@ class CalculatorTilePriorityService : Service() {
         trace("onStartCommand")
         val notification = buildNotification()
         runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 startForeground(
                     NOTIFICATION_ID,
                     notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
                 )
             } else {
                 startForeground(NOTIFICATION_ID, notification)
@@ -157,11 +157,15 @@ class CalculatorTilePriorityService : Service() {
         }
 
         private fun traceStatic(event: String) {
-            Log.i(TAG, "TRACE event=$event t=${SystemClock.elapsedRealtimeNanos()}")
+            if (BuildConfig.DEBUG) {
+                Log.i(TAG, "TRACE event=$event t=${SystemClock.elapsedRealtimeNanos()}")
+            }
         }
     }
 
     private fun trace(event: String) {
-        Log.i(TAG, "TRACE event=$event t=${SystemClock.elapsedRealtimeNanos()}")
+        if (BuildConfig.DEBUG) {
+            Log.i(TAG, "TRACE event=$event t=${SystemClock.elapsedRealtimeNanos()}")
+        }
     }
 }
