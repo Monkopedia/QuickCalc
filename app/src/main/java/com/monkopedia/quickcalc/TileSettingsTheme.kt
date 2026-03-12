@@ -49,7 +49,7 @@ fun calculatorDialogPalette(settings: TileSettings, darkTheme: Boolean): Calcula
     val accent = resolveTileAccentColor(settings.accentColorArgb, darkTheme)
     val displayBackground = if (darkTheme) Color(0xFF121212) else Color(0xFFFFFFFF)
     val formulaColor = if (darkTheme) Color(0xB3FFFFFF) else Color(0x8A000000)
-    val resultColor = if (darkTheme) Color(0x99FFFFFF) else Color(0x6C000000)
+    val resultColor = if (darkTheme) Color(0x99FFFFFF) else Color(0x80000000)
     val numericPadBackground = if (darkTheme) Color(0xFF2E2E2E) else Color(0xFF434343)
     val operatorPadBackground = if (darkTheme) Color(0xFF424242) else Color(0xFF636363)
     val advancedPadBackground = if (darkTheme) lighten(accent, 0.12f) else accent

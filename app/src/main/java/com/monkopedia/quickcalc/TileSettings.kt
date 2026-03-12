@@ -33,10 +33,7 @@ enum class TileDialogBackgroundMode {
     DARK,
     BLUR_SUBTLE,
     BLUR_LIGHT,
-    BLUR_HEAVY,
-
-    // Legacy debug option kept for preference compatibility only.
-    BLUR_DEBUG
+    BLUR_HEAVY
 }
 
 enum class TileStaticAlignment {
@@ -103,8 +100,4 @@ fun normalizeDialogInactivityTimeoutSeconds(seconds: Int): Int =
         )
     }
 
-fun canonicalDialogBackgroundMode(mode: TileDialogBackgroundMode): TileDialogBackgroundMode =
-    when (mode) {
-        TileDialogBackgroundMode.BLUR_DEBUG -> TileDialogBackgroundMode.BLUR_HEAVY
-        else -> mode
-    }
+fun canonicalDialogBackgroundMode(mode: TileDialogBackgroundMode): TileDialogBackgroundMode = mode

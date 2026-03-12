@@ -25,7 +25,9 @@
     <application
         android:icon="@mipmap/ic_launcher_calculator"
         android:label="@string/app_name"
-        android:theme="@style/CalculatorTheme">
+        android:theme="@style/CalculatorTheme"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules">
 
         <activity
             android:name=".CalculatorComposeActivity"

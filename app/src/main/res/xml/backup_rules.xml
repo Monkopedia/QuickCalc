@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Backup rules for Android 11 and below (fullBackupContent).
+  Exclude DataStore preferences to avoid restoring stale tile state on a new device.
+-->
+<full-backup-content>
+    <exclude
+        domain="sharedpref"
+        path="." />
+    <exclude
+        domain="file"
+        path="datastore/" />
+</full-backup-content>

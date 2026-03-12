@@ -23,6 +23,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 private const val AUTOSAVE_DEBOUNCE_MS = 180L
@@ -49,6 +51,7 @@ internal class TileAutosaveManager(
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
+    private val persistMutex = Mutex()
     private var lastPersistedTransform: DynamicTransform? = null
     private var lastPersistedCalculatorState: CalculatorUiState? = null
     private var lastPersistedRememberState: Boolean? = null
@@ -75,37 +78,39 @@ internal class TileAutosaveManager(
     }
 
     private suspend fun persistSnapshot(snapshot: AutosaveSnapshot, force: Boolean = false) {
-        val transformSnapshot = snapshot.transform
-        val calculatorStateSnapshot = snapshot.calculatorState
-        val rememberStateSnapshot = snapshot.rememberState
+        persistMutex.withLock {
+            val transformSnapshot = snapshot.transform
+            val calculatorStateSnapshot = snapshot.calculatorState
+            val rememberStateSnapshot = snapshot.rememberState
 
-        if (transformSnapshot != null &&
-            (force || transformSnapshot != lastPersistedTransform)
-        ) {
-            settingsRepository.setDynamicTransform(
-                scale = transformSnapshot.scale,
-                offsetXFraction = transformSnapshot.offsetXFraction,
-                offsetYFraction = transformSnapshot.offsetYFraction
-            )
-            lastPersistedTransform = transformSnapshot
-        }
-
-        if (rememberStateSnapshot) {
-            if (force ||
-                calculatorStateSnapshot != lastPersistedCalculatorState ||
-                lastPersistedRememberState != true
+            if (transformSnapshot != null &&
+                (force || transformSnapshot != lastPersistedTransform)
             ) {
-                settingsRepository.saveCalculatorState(calculatorStateSnapshot)
-                lastPersistedCalculatorState = calculatorStateSnapshot
+                settingsRepository.setDynamicTransform(
+                    scale = transformSnapshot.scale,
+                    offsetXFraction = transformSnapshot.offsetXFraction,
+                    offsetYFraction = transformSnapshot.offsetYFraction
+                )
+                lastPersistedTransform = transformSnapshot
             }
-            lastPersistedRememberState = true
-            return
-        }
 
-        if (force || lastPersistedRememberState != false) {
-            settingsRepository.clearCalculatorState()
-            lastPersistedCalculatorState = CalculatorUiState()
-            lastPersistedRememberState = false
+            if (rememberStateSnapshot) {
+                if (force ||
+                    calculatorStateSnapshot != lastPersistedCalculatorState ||
+                    lastPersistedRememberState != true
+                ) {
+                    settingsRepository.saveCalculatorState(calculatorStateSnapshot)
+                    lastPersistedCalculatorState = calculatorStateSnapshot
+                }
+                lastPersistedRememberState = true
+                return
+            }
+
+            if (force || lastPersistedRememberState != false) {
+                settingsRepository.clearCalculatorState()
+                lastPersistedCalculatorState = CalculatorUiState()
+                lastPersistedRememberState = false
+            }
         }
     }
 }

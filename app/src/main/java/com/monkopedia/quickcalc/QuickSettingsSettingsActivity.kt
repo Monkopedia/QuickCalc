@@ -671,5 +671,4 @@ private fun dialogBackgroundLabel(mode: TileDialogBackgroundMode): String = when
     TileDialogBackgroundMode.BLUR_SUBTLE -> stringResource(R.string.settings_bg_blur_light)
     TileDialogBackgroundMode.BLUR_LIGHT -> stringResource(R.string.settings_bg_blur_medium)
     TileDialogBackgroundMode.BLUR_HEAVY -> stringResource(R.string.settings_bg_blur_heavy)
-    TileDialogBackgroundMode.BLUR_DEBUG -> stringResource(R.string.settings_bg_blur_heavy)
 }

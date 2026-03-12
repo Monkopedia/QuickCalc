@@ -42,14 +42,11 @@ fun dialogWindowOverlayColorArgb(mode: TileDialogBackgroundMode, darkTheme: Bool
             if (darkTheme) Color.argb(28, 0, 0, 0) else Color.argb(22, 0, 0, 0)
         TileDialogBackgroundMode.BLUR_HEAVY ->
             if (darkTheme) Color.argb(44, 0, 0, 0) else Color.argb(36, 0, 0, 0)
-        TileDialogBackgroundMode.BLUR_DEBUG ->
-            if (darkTheme) Color.argb(44, 0, 0, 0) else Color.argb(36, 0, 0, 0)
     }
 
 fun dialogWindowBackgroundBlurRadiusPx(mode: TileDialogBackgroundMode): Int = when (mode) {
     TileDialogBackgroundMode.BLUR_SUBTLE -> 12
     TileDialogBackgroundMode.BLUR_LIGHT -> 72
     TileDialogBackgroundMode.BLUR_HEAVY -> 132
-    TileDialogBackgroundMode.BLUR_DEBUG -> 132
     else -> 0
 }
