@@ -10,9 +10,9 @@ robolectric = "4.16.1"
 ktlintCli = "1.3.1"
 detektCli = "1.23.8"
 roborazzi = "1.52.0"
-composeBom = "2026.01.01"
-activityCompose = "1.11.0"
-kotlinCompose = "2.3.0"
+composeBom = "2026.02.01"
+activityCompose = "1.12.4"
+kotlinCompose = "2.3.10"
 datastorePreferences = "1.1.7"
 
 [libraries]
