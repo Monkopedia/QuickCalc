@@ -157,6 +157,7 @@ tasks.register<JavaExec>("detektCheck") {
 
 dependencyLocking {
     lockAllConfigurations()
+    ignoredDependencies.add("org.jetbrains.kotlin:kotlin-stdlib-common")
 }
 
 jacoco {
