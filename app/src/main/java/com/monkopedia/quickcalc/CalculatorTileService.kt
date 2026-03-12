@@ -18,8 +18,6 @@
 
 package com.monkopedia.quickcalc
 
-import android.content.res.Configuration
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Handler
@@ -29,8 +27,6 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.util.Log
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
-import android.view.WindowManager
 import androidx.activity.ComponentDialog
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
@@ -68,20 +64,15 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import java.lang.ref.WeakReference
-import java.util.function.Consumer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @RequiresApi(Build.VERSION_CODES.N)
 class CalculatorTileService : TileService() {
@@ -104,30 +95,29 @@ class CalculatorTileService : TileService() {
 
     private val settingsRepository by lazy { TileSettingsRepository(applicationContext) }
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val windowEffects by lazy { DialogWindowEffects(applicationContext) }
+    private val autosaveManager by lazy {
+        TileAutosaveManager(settingsRepository, serviceScope) {
+            AutosaveSnapshot(
+                transform = latestDynamicTransform,
+                calculatorState = latestCalculatorState,
+                rememberState = cachedSettings.rememberCalculatorState
+            )
+        }
+    }
     private var activeDialog: ComponentDialog? = null
     private var latestCalculatorState: CalculatorUiState = CalculatorUiState()
     private var latestDynamicTransform: DynamicTransform? = null
     private var cachedSettings: TileSettings = TileSettings()
     private var lastPriorityRefreshElapsedRealtimeMs: Long = 0L
     private var inactivityCloseJob: Job? = null
-    private var blurEnabledListener: Consumer<Boolean>? = null
-    private var lastAppliedBackgroundSignature: String? = null
-    private var dialogWindowStabilizer: Runnable? = null
-    private var dialogWindowFocusChangeListener:
-        ViewTreeObserver.OnWindowFocusChangeListener? = null
-    private val autosaveSignals = MutableSharedFlow<Unit>(
-        replay = 0,
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    private var lastPersistedTransform: DynamicTransform? = null
-    private var lastPersistedCalculatorState: CalculatorUiState? = null
-    private var lastPersistedRememberState: Boolean? = null
 
     override fun onCreate() {
         super.onCreate()
         trace("onCreate")
-        registerCrossWindowBlurListener()
+        windowEffects.registerCrossWindowBlurListener {
+            windowEffects.applyBackgroundEffect(activeDialog, cachedSettings, force = true)
+        }
         serviceScope.launch {
             settingsRepository.settingsFlow.collect { settings ->
                 val backgroundChanged =
@@ -140,29 +130,15 @@ class CalculatorTileService : TileService() {
                     cachedSettings.rememberCalculatorState != settings.rememberCalculatorState
                 cachedSettings = settings
                 if (backgroundChanged) {
-                    applyDialogWindowBackgroundEffect(activeDialog, settings, force = true)
+                    windowEffects.applyBackgroundEffect(activeDialog, settings, force = true)
                 }
                 if (timeoutChanged && activeDialog?.isShowing == true) {
                     scheduleInactivityAutoClose()
                 }
                 if (rememberStateChanged) {
-                    scheduleAutosave()
+                    autosaveManager.schedule()
                 }
             }
-        }
-        serviceScope.launch {
-            autosaveSignals
-                .collectLatest {
-                    delay(AUTOSAVE_DEBOUNCE_MS)
-                    val snapshot = AutosaveSnapshot(
-                        transform = latestDynamicTransform,
-                        calculatorState = latestCalculatorState,
-                        rememberState = cachedSettings.rememberCalculatorState
-                    )
-                    withContext(Dispatchers.IO) {
-                        persistAutosaveSnapshot(snapshot)
-                    }
-                }
         }
     }
 
@@ -197,7 +173,7 @@ class CalculatorTileService : TileService() {
 
     override fun onDestroy() {
         trace("onDestroy")
-        unregisterCrossWindowBlurListener()
+        windowEffects.unregisterCrossWindowBlurListener()
         inactivityCloseJob?.cancel()
         inactivityCloseJob = null
         serviceScope.cancel()
@@ -227,7 +203,7 @@ class CalculatorTileService : TileService() {
                             latestDynamicTransform = DynamicTransform(scale, xFraction, yFraction)
                         },
                         onDynamicTransformSettled = {
-                            scheduleAutosave()
+                            autosaveManager.schedule()
                             recordUserInteraction()
                         },
                         onAnyUserInteraction = { recordUserInteraction() },
@@ -247,7 +223,7 @@ class CalculatorTileService : TileService() {
                             },
                             onCalculatorStateChange = { state ->
                                 latestCalculatorState = state
-                                scheduleAutosave()
+                                autosaveManager.schedule()
                                 recordUserInteraction()
                             }
                         )
@@ -273,33 +249,33 @@ class CalculatorTileService : TileService() {
                 window?.setWindowAnimations(0)
                 window?.decorView?.setPadding(0, 0, 0, 0)
                 window?.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
-                applyDialogWindowBackgroundEffect(this, cachedSettings, force = true)
-                installWindowFocusBlurHook(this)
+                windowEffects.applyBackgroundEffect(this, cachedSettings, force = true)
+                windowEffects.installFocusBlurHook(this, cachedSettings)
                 // Re-apply after attachment/animation settles to avoid first-frame drops.
                 window?.decorView?.post {
                     if (isShowing) {
-                        applyDialogWindowBackgroundEffect(this, cachedSettings, force = true)
+                        windowEffects.applyBackgroundEffect(this, cachedSettings, force = true)
                     }
                 }
                 mainHandler.postDelayed({
                     if (isShowing) {
-                        applyDialogWindowBackgroundEffect(this, cachedSettings, force = true)
+                        windowEffects.applyBackgroundEffect(this, cachedSettings, force = true)
                     }
                 }, 90L)
-                startDialogWindowStabilizer(this)
+                windowEffects.startStabilizer(this, cachedSettings)
                 scheduleInactivityAutoClose()
             }
             setOnDismissListener {
                 trace("dialog_onDismiss")
-                stopDialogWindowStabilizer()
-                removeWindowFocusBlurHook(this)
+                windowEffects.stopStabilizer(this)
+                windowEffects.removeFocusBlurHook(this)
                 if (activeDialog === this) {
                     activeDialog = null
                 }
                 if (activeDialogRef?.get() === this) {
                     activeDialogRef = null
                 }
-                lastAppliedBackgroundSignature = null
+                windowEffects.clearSignature()
                 inactivityCloseJob?.cancel()
                 inactivityCloseJob = null
                 val dismissSnapshot = AutosaveSnapshot(
@@ -309,7 +285,7 @@ class CalculatorTileService : TileService() {
                 )
                 serviceScope.launch(Dispatchers.IO + NonCancellable) {
                     runCatching {
-                        persistAutosaveSnapshot(dismissSnapshot, force = true)
+                        autosaveManager.persistNow(dismissSnapshot)
                     }.onFailure { throwable ->
                         Log.w(TAG, "Failed to persist tile snapshot during dismiss", throwable)
                     }
@@ -317,7 +293,7 @@ class CalculatorTileService : TileService() {
                 CalculatorTilePriorityService.stop(this@CalculatorTileService)
             }
         }
-        applyDialogWindowBackgroundEffect(dialog, cachedSettings, force = true)
+        windowEffects.applyBackgroundEffect(dialog, cachedSettings, force = true)
         activeDialog = dialog
         activeDialogRef = WeakReference(dialog)
         trace("showDialog")
@@ -335,11 +311,9 @@ class CalculatorTileService : TileService() {
     }
 
     private fun trace(event: String) {
-        Log.i(TAG, "TRACE event=$event t=${SystemClock.elapsedRealtimeNanos()}")
-    }
-
-    private fun scheduleAutosave() {
-        autosaveSignals.tryEmit(Unit)
+        if (BuildConfig.DEBUG) {
+            Log.i(TAG, "TRACE event=$event t=${SystemClock.elapsedRealtimeNanos()}")
+        }
     }
 
     private fun recordUserInteraction() {
@@ -358,44 +332,6 @@ class CalculatorTileService : TileService() {
         CalculatorTilePriorityService.start(this)
     }
 
-    private suspend fun persistAutosaveSnapshot(
-        snapshot: AutosaveSnapshot,
-        force: Boolean = false
-    ) {
-        val transformSnapshot = snapshot.transform
-        val calculatorStateSnapshot = snapshot.calculatorState
-        val rememberStateSnapshot = snapshot.rememberState
-
-        if (transformSnapshot != null &&
-            (force || transformSnapshot != lastPersistedTransform)
-        ) {
-            settingsRepository.setDynamicTransform(
-                scale = transformSnapshot.scale,
-                offsetXFraction = transformSnapshot.offsetXFraction,
-                offsetYFraction = transformSnapshot.offsetYFraction
-            )
-            lastPersistedTransform = transformSnapshot
-        }
-
-        if (rememberStateSnapshot) {
-            if (force ||
-                calculatorStateSnapshot != lastPersistedCalculatorState ||
-                lastPersistedRememberState != true
-            ) {
-                settingsRepository.saveCalculatorState(calculatorStateSnapshot)
-                lastPersistedCalculatorState = calculatorStateSnapshot
-            }
-            lastPersistedRememberState = true
-            return
-        }
-
-        if (force || lastPersistedRememberState != false) {
-            settingsRepository.clearCalculatorState()
-            lastPersistedCalculatorState = CalculatorUiState()
-            lastPersistedRememberState = false
-        }
-    }
-
     private fun scheduleInactivityAutoClose() {
         inactivityCloseJob?.cancel()
         val timeoutSeconds = cachedSettings.dialogInactivityTimeoutSeconds
@@ -412,164 +348,10 @@ class CalculatorTileService : TileService() {
             }
         }
     }
-
-    private fun applyDialogWindowBackgroundEffect(
-        dialog: ComponentDialog?,
-        settings: TileSettings,
-        force: Boolean = false,
-        log: Boolean = true
-    ) {
-        val window = dialog?.window ?: return
-        val blurSupported = isDialogBlurSupported(this)
-        val mode = settings.dialogBackgroundMode
-        val darkTheme = isDialogDarkTheme(settings, isSystemDark = isSystemNightMode())
-        val overlayColor = dialogWindowOverlayColorArgb(mode, darkTheme)
-        val blurRadius = dialogWindowBackgroundBlurRadiusPx(mode)
-        val signature = "$mode|$darkTheme|$overlayColor|$blurRadius|$blurSupported"
-        if (!force && signature == lastAppliedBackgroundSignature) {
-            return
-        }
-        lastAppliedBackgroundSignature = signature
-        window.setBackgroundDrawable(ColorDrawable(overlayColor))
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            if (log) {
-                Log.i(
-                    TAG,
-                    "applyDialogWindowBackgroundEffect mode=$mode blurSupported=$blurSupported " +
-                        "overlayAlpha=${android.graphics.Color.alpha(overlayColor)} " +
-                        "blurRadius=$blurRadius api=${Build.VERSION.SDK_INT}"
-                )
-            }
-            return
-        }
-        val attributes = window.attributes
-        if (blurRadius > 0) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-            window.setDimAmount(BLUR_DIM_AMOUNT)
-            window.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
-            attributes.blurBehindRadius = blurRadius
-        } else {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-            window.clearFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND)
-            attributes.blurBehindRadius = 0
-        }
-        window.attributes = attributes
-        window.setBackgroundBlurRadius(blurRadius)
-        // Force a frame after blur attribute changes so the blur shows immediately.
-        window.decorView.postInvalidateOnAnimation()
-        val blurBehindEnabled =
-            (window.attributes.flags and WindowManager.LayoutParams.FLAG_BLUR_BEHIND) != 0
-        if (log) {
-            Log.i(
-                TAG,
-                "applyDialogWindowBackgroundEffect mode=$mode blurSupported=$blurSupported " +
-                    "overlayAlpha=${android.graphics.Color.alpha(overlayColor)} " +
-                    "blurBehindRadius=${window.attributes.blurBehindRadius} " +
-                    "blurBehindEnabled=$blurBehindEnabled"
-            )
-        }
-    }
-
-    private fun startDialogWindowStabilizer(dialog: ComponentDialog) {
-        stopDialogWindowStabilizer()
-        val runnable = object : Runnable {
-            override fun run() {
-                if (!dialog.isShowing) {
-                    return
-                }
-                applyDialogWindowBackgroundEffect(
-                    dialog = dialog,
-                    settings = cachedSettings,
-                    force = true,
-                    log = false
-                )
-                dialog.window?.decorView?.postDelayed(this, DIALOG_WINDOW_STABILIZER_INTERVAL_MS)
-            }
-        }
-        dialogWindowStabilizer = runnable
-        dialog.window?.decorView?.postDelayed(runnable, DIALOG_WINDOW_STABILIZER_START_DELAY_MS)
-    }
-
-    private fun stopDialogWindowStabilizer() {
-        val runnable = dialogWindowStabilizer ?: return
-        activeDialog?.window?.decorView?.removeCallbacks(runnable)
-        activeDialogRef?.get()?.window?.decorView?.removeCallbacks(runnable)
-        dialogWindowStabilizer = null
-    }
-
-    private fun registerCrossWindowBlurListener() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || blurEnabledListener != null) {
-            return
-        }
-        val windowManager = getSystemService(WindowManager::class.java) ?: return
-        val listener = Consumer<Boolean> { enabled ->
-            Log.i(TAG, "crossWindowBlurEnabled changed: $enabled")
-            applyDialogWindowBackgroundEffect(activeDialog, cachedSettings, force = true)
-        }
-        blurEnabledListener = listener
-        windowManager.addCrossWindowBlurEnabledListener(mainExecutor, listener)
-    }
-
-    private fun unregisterCrossWindowBlurListener() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            return
-        }
-        val listener = blurEnabledListener ?: return
-        val windowManager = getSystemService(WindowManager::class.java) ?: return
-        windowManager.removeCrossWindowBlurEnabledListener(listener)
-        blurEnabledListener = null
-    }
-
-    private fun isSystemNightMode(): Boolean {
-        val nightModeMask = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        return nightModeMask == Configuration.UI_MODE_NIGHT_YES
-    }
-
-    private fun installWindowFocusBlurHook(dialog: ComponentDialog) {
-        removeWindowFocusBlurHook(dialog)
-        val decorView = dialog.window?.decorView ?: return
-        decorView.isFocusableInTouchMode = true
-        decorView.requestFocus()
-        decorView.requestFocusFromTouch()
-        val listener = ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
-            Log.i(TAG, "dialog_window_focus_changed hasFocus=$hasFocus")
-            if (hasFocus) {
-                applyDialogWindowBackgroundEffect(dialog, cachedSettings, force = true)
-            }
-        }
-        dialogWindowFocusChangeListener = listener
-        decorView.viewTreeObserver.addOnWindowFocusChangeListener(listener)
-    }
-
-    private fun removeWindowFocusBlurHook(dialog: ComponentDialog) {
-        val listener = dialogWindowFocusChangeListener ?: return
-        val decorView = dialog.window?.decorView
-        val observer = decorView?.viewTreeObserver
-        if (observer != null && observer.isAlive) {
-            observer.removeOnWindowFocusChangeListener(listener)
-        }
-        dialogWindowFocusChangeListener = null
-    }
 }
 
-internal data class AutosaveSnapshot(
-    val transform: DynamicTransform?,
-    val calculatorState: CalculatorUiState,
-    val rememberState: Boolean
-)
-
-internal data class DynamicTransform(
-    val scale: Float,
-    val offsetXFraction: Float,
-    val offsetYFraction: Float
-)
-
 private const val DYNAMIC_OFFSCREEN_DRAG_FRACTION = 0.22f
-private const val AUTOSAVE_DEBOUNCE_MS = 180L
 private const val PRIORITY_REFRESH_MIN_INTERVAL_MS = 15_000L
-private const val DIALOG_WINDOW_STABILIZER_START_DELAY_MS = 1_250L
-private const val DIALOG_WINDOW_STABILIZER_INTERVAL_MS = 700L
-private const val BLUR_DIM_AMOUNT = 0.01f
 private val STATIC_EDGE_MARGIN_DP = 12.dp
 
 internal fun dynamicMaxOffsetFraction(baseFraction: Float, scale: Float): Float =
